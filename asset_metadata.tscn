@@ -1,0 +1,266 @@
+[gd_scene load_steps=35 format=2]
+
+[ext_resource path="res://assets/rock2.tscn" type="PackedScene" id=1]
+[ext_resource path="res://assets/rock1.tscn" type="PackedScene" id=2]
+[ext_resource path="res://assets/real_grass.tscn" type="PackedScene" id=3]
+[ext_resource path="res://assets/shitty_fg_leaf.tscn" type="PackedScene" id=4]
+[ext_resource path="res://calculate_metadata.gd" type="Script" id=5]
+[ext_resource path="res://assets/flower.tscn" type="PackedScene" id=6]
+[ext_resource path="res://assets/leaf1.tscn" type="PackedScene" id=7]
+[ext_resource path="res://assets/leaf2.tscn" type="PackedScene" id=8]
+[ext_resource path="res://assets/leaf4.tscn" type="PackedScene" id=9]
+[ext_resource path="res://assets/leaf3.tscn" type="PackedScene" id=10]
+[ext_resource path="res://assets/leavesb2.tscn" type="PackedScene" id=11]
+[ext_resource path="res://assets/leavesb1.tscn" type="PackedScene" id=12]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0004.png" type="Texture" id=13]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0007.png" type="Texture" id=14]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0012.png" type="Texture" id=15]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0011.png" type="Texture" id=16]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0014.png" type="Texture" id=17]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0020.png" type="Texture" id=18]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0005.png" type="Texture" id=19]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0003.png" type="Texture" id=20]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0009.png" type="Texture" id=21]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0013.png" type="Texture" id=22]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0001.png" type="Texture" id=23]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0017.png" type="Texture" id=24]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0010.png" type="Texture" id=25]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0008.png" type="Texture" id=26]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0015.png" type="Texture" id=27]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0016.png" type="Texture" id=28]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0019.png" type="Texture" id=29]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0002.png" type="Texture" id=30]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0018.png" type="Texture" id=31]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0000.png" type="Texture" id=32]
+[ext_resource path="res://img/matts_leaves/TreesLeaves0006.png" type="Texture" id=33]
+[ext_resource path="res://grass_asset.gd" type="Script" id=34]
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource( 5 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="assets" type="Node" parent="."]
+
+[node name="Sprite" parent="assets" instance=ExtResource( 3 )]
+position = Vector2( 47.5187, -219.102 )
+
+[node name="GrassSprite" parent="assets" instance=ExtResource( 2 )]
+position = Vector2( 49.0187, -165.102 )
+
+[node name="GrassSprite2" parent="assets" instance=ExtResource( 1 )]
+position = Vector2( 83.5187, -235.602 )
+
+[node name="GrassSprite3" parent="assets" instance=ExtResource( 4 )]
+position = Vector2( 77.4229, -157.024 )
+
+[node name="GrassSprite4" parent="assets" instance=ExtResource( 6 )]
+position = Vector2( 129.111, -212.664 )
+
+[node name="leaf1" parent="assets" instance=ExtResource( 7 )]
+position = Vector2( 205.575, -225.753 )
+
+[node name="leaf2" parent="assets" instance=ExtResource( 8 )]
+position = Vector2( 171.996, -172.109 )
+
+[node name="leaf3" parent="assets" instance=ExtResource( 10 )]
+position = Vector2( 222.276, -171.979 )
+
+[node name="leaf4" parent="assets" instance=ExtResource( 9 )]
+position = Vector2( 135.068, -137.095 )
+
+[node name="leaf5" parent="assets" instance=ExtResource( 12 )]
+position = Vector2( 57.3736, -125.996 )
+
+[node name="leaf6" parent="assets" instance=ExtResource( 11 )]
+position = Vector2( 42.2964, -67.3518 )
+
+[node name="TreesLeaves0000" type="Sprite" parent="assets"]
+position = Vector2( 58.5849, 52.0028 )
+texture = ExtResource( 32 )
+centered = false
+offset = Vector2( -17.0855, -41.3299 )
+script = ExtResource( 34 )
+weight_end = Vector2( 32, -32 )
+
+[node name="TreesLeaves0001" type="Sprite" parent="assets"]
+position = Vector2( 73.9252, 157.514 )
+texture = ExtResource( 23 )
+centered = false
+offset = Vector2( -27.2545, -43.2893 )
+script = ExtResource( 34 )
+weight_end = Vector2( 0, -38 )
+
+[node name="TreesLeaves0002" type="Sprite" parent="assets"]
+position = Vector2( 63.823, 211.767 )
+texture = ExtResource( 30 )
+centered = false
+offset = Vector2( -15.963, -33.7207 )
+script = ExtResource( 34 )
+weight_end = Vector2( 40, -28 )
+
+[node name="TreesLeaves0003" type="Sprite" parent="assets"]
+position = Vector2( 61.204, 266.393 )
+texture = ExtResource( 20 )
+centered = false
+offset = Vector2( -14.1367, -29.2832 )
+script = ExtResource( 34 )
+weight_end = Vector2( 48, -8 )
+
+[node name="TreesLeaves0004" type="Sprite" parent="assets"]
+position = Vector2( 65.6938, 354.319 )
+texture = ExtResource( 13 )
+centered = false
+offset = Vector2( -19.8158, -41.4964 )
+script = ExtResource( 34 )
+weight_end = Vector2( 16, -28 )
+
+[node name="TreesLeaves0005" type="Sprite" parent="assets"]
+position = Vector2( 174.947, 125.337 )
+texture = ExtResource( 19 )
+centered = false
+offset = Vector2( -14.1118, -75.3293 )
+script = ExtResource( 34 )
+weight_end = Vector2( 80, -60 )
+weight_mode = "RADIAL"
+
+[node name="TreesLeaves0006" type="Sprite" parent="assets"]
+position = Vector2( 192.158, 222.991 )
+texture = ExtResource( 33 )
+centered = false
+offset = Vector2( -29.3409, -77.6243 )
+script = ExtResource( 34 )
+weight_end = Vector2( 50, -90 )
+weight_mode = "RADIAL"
+
+[node name="TreesLeaves0007" type="Sprite" parent="assets"]
+position = Vector2( 173.824, 291.461 )
+texture = ExtResource( 14 )
+centered = false
+offset = Vector2( -15.7642, -49.5947 )
+script = ExtResource( 34 )
+weight_end = Vector2( 70, -40 )
+weight_mode = "RADIAL"
+
+[node name="TreesLeaves0008" type="Sprite" parent="assets"]
+position = Vector2( 185.049, 372.653 )
+texture = ExtResource( 26 )
+centered = false
+offset = Vector2( -22.3956, -47.145 )
+script = ExtResource( 34 )
+weight_end = Vector2( 80, -20 )
+weight_mode = "RADIAL"
+
+[node name="TreesLeaves0009" type="Sprite" parent="assets"]
+position = Vector2( 268.111, 59.1117 )
+texture = ExtResource( 21 )
+centered = false
+offset = Vector2( -9.36469, -12.2753 )
+script = ExtResource( 34 )
+weight_end = Vector2( 16, 0 )
+
+[node name="TreesLeaves0010" type="Sprite" parent="assets"]
+position = Vector2( 266.989, 122.344 )
+texture = ExtResource( 25 )
+centered = false
+offset = Vector2( -7.84579, -21.2001 )
+script = ExtResource( 34 )
+weight_end = Vector2( 20, -13 )
+
+[node name="TreesLeaves0011" type="Sprite" parent="assets"]
+position = Vector2( 265.492, 171.732 )
+texture = ExtResource( 16 )
+centered = false
+offset = Vector2( -7.14197, -12.3171 )
+script = ExtResource( 34 )
+weight_end = Vector2( 20, 0 )
+
+[node name="TreesLeaves0012" type="Sprite" parent="assets"]
+position = Vector2( 268.111, 228.978 )
+texture = ExtResource( 15 )
+centered = false
+offset = Vector2( -8.17548, -17.6339 )
+script = ExtResource( 34 )
+weight_end = Vector2( 22, -6 )
+
+[node name="TreesLeaves0013" type="Sprite" parent="assets"]
+position = Vector2( 414.78, 95.7788 )
+texture = ExtResource( 22 )
+centered = false
+offset = Vector2( -48.6078, -42.5999 )
+script = ExtResource( 34 )
+weight_end = Vector2( 0, 48 )
+weight_mode = "RADIAL"
+
+[node name="TreesLeaves0014" type="Sprite" parent="assets"]
+position = Vector2( 403.181, 186.698 )
+texture = ExtResource( 17 )
+centered = false
+offset = Vector2( -38.9911, -38.779 )
+script = ExtResource( 34 )
+weight_end = Vector2( 0, 40 )
+weight_mode = "RADIAL"
+
+[node name="TreesLeaves0015" type="Sprite" parent="assets"]
+position = Vector2( 399.439, 260.781 )
+texture = ExtResource( 27 )
+centered = false
+offset = Vector2( -29.6999, -26.4456 )
+script = ExtResource( 34 )
+weight_end = Vector2( 0, 32 )
+weight_mode = "RADIAL"
+
+[node name="TreesLeaves0016" type="Sprite" parent="assets"]
+position = Vector2( 389.711, 341.224 )
+texture = ExtResource( 28 )
+centered = false
+offset = Vector2( -27.8999, -23.6441 )
+script = ExtResource( 34 )
+weight_end = Vector2( 0, 48 )
+weight_mode = "RADIAL"
+
+[node name="TreesLeaves0017" type="Sprite" parent="assets"]
+position = Vector2( 544.237, 89.044 )
+texture = ExtResource( 24 )
+centered = false
+offset = Vector2( -46.4593, -38.64 )
+script = ExtResource( 34 )
+weight_end = Vector2( 0, 48 )
+weight_mode = "RADIAL"
+
+[node name="TreesLeaves0018" type="Sprite" parent="assets"]
+position = Vector2( 536.38, 178.841 )
+texture = ExtResource( 31 )
+centered = false
+offset = Vector2( -39.3948, -34.4894 )
+script = ExtResource( 34 )
+weight_end = Vector2( 0, 40 )
+weight_mode = "RADIAL"
+
+[node name="TreesLeaves0019" type="Sprite" parent="assets"]
+position = Vector2( 530.019, 249.93 )
+texture = ExtResource( 29 )
+centered = false
+offset = Vector2( -30.2595, -25.5052 )
+script = ExtResource( 34 )
+weight_end = Vector2( 0, 32 )
+weight_mode = "RADIAL"
+
+[node name="TreesLeaves0020" type="Sprite" parent="assets"]
+position = Vector2( 527.026, 331.87 )
+texture = ExtResource( 18 )
+centered = false
+offset = Vector2( -28.059, -22.6147 )
+script = ExtResource( 34 )
+weight_end = Vector2( 0, 40 )
+weight_mode = "RADIAL"
+
+[node name="output" type="TextEdit" parent="."]
+margin_left = 673.0
+margin_top = 1.0
+margin_right = 1023.0
+margin_bottom = 597.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
