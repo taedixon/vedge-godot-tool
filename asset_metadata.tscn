@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=2]
+[gd_scene load_steps=36 format=2]
 
 [ext_resource path="res://assets/rock2.tscn" type="PackedScene" id=1]
 [ext_resource path="res://assets/rock1.tscn" type="PackedScene" id=2]
@@ -34,6 +34,7 @@
 [ext_resource path="res://img/matts_leaves/TreesLeaves0000.png" type="Texture" id=32]
 [ext_resource path="res://img/matts_leaves/TreesLeaves0006.png" type="Texture" id=33]
 [ext_resource path="res://grass_asset.gd" type="Script" id=34]
+[ext_resource path="res://img/s_orange_flower.png" type="Texture" id=35]
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource( 5 )
@@ -255,6 +256,14 @@ offset = Vector2( -28.6312, -37.1435 )
 script = ExtResource( 34 )
 weight_end = Vector2( 0, -40 )
 weight_mode = "RADIAL"
+
+[node name="s_orange_flower" type="Sprite" parent="assets"]
+position = Vector2( 105.077, 498.682 )
+texture = ExtResource( 35 )
+centered = false
+offset = Vector2( -31.8314, -62.8956 )
+script = ExtResource( 34 )
+weight_end = Vector2( 8, -50 )
 
 [node name="output" type="TextEdit" parent="."]
 margin_left = 673.0
