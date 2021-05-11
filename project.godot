@@ -21,7 +21,7 @@ _global_script_class_icons={
 [application]
 
 config/name="vedge-tools"
-run/main_scene="res://asset_metadata.tscn"
+run/main_scene="res://scenes/hsl_editor.tscn"
 config/icon="res://icon.png"
 
 [importer_defaults]

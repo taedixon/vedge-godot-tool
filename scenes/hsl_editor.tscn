@@ -1,0 +1,307 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://icon.png" type="Texture" id=1]
+[ext_resource path="res://scenes/hsl_controller.gd" type="Script" id=2]
+[ext_resource path="res://hsl_shift.shader" type="Shader" id=3]
+
+[sub_resource type="ShaderMaterial" id=1]
+shader = ExtResource( 3 )
+shader_param/in_hsv = Vector3( 0, 0, 0 )
+shader_param/in_bca = Vector3( 0, 1, 1 )
+
+[node name="hsl_editor" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="panel" type="PanelContainer" parent="."]
+anchor_left = 0.6
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="margin" type="MarginContainer" parent="panel"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 402.6
+margin_bottom = 593.0
+
+[node name="list" type="VBoxContainer" parent="panel/margin"]
+margin_right = 395.0
+margin_bottom = 586.0
+custom_constants/separation = 3
+
+[node name="label_hue" type="Label" parent="panel/margin/list"]
+margin_right = 395.0
+margin_bottom = 14.0
+text = "Hue"
+align = 1
+
+[node name="slider_hue" type="HSlider" parent="panel/margin/list"]
+margin_top = 17.0
+margin_right = 395.0
+margin_bottom = 33.0
+min_value = -0.5
+max_value = 0.5
+step = 0.01
+tick_count = 10
+
+[node name="text_hue" type="TextEdit" parent="panel/margin/list"]
+margin_top = 36.0
+margin_right = 395.0
+margin_bottom = 56.0
+rect_min_size = Vector2( 0, 20 )
+custom_constants/line_spacing = 0
+text = "0"
+caret_blink = true
+
+[node name="HSeparator" type="HSeparator" parent="panel/margin/list"]
+margin_top = 59.0
+margin_right = 395.0
+margin_bottom = 71.0
+rect_min_size = Vector2( 0, 12 )
+
+[node name="label_sat" type="Label" parent="panel/margin/list"]
+margin_top = 74.0
+margin_right = 395.0
+margin_bottom = 88.0
+text = "Saturation"
+align = 1
+
+[node name="slider_sat" type="HSlider" parent="panel/margin/list"]
+margin_top = 91.0
+margin_right = 395.0
+margin_bottom = 107.0
+min_value = -0.5
+max_value = 0.5
+step = 0.01
+tick_count = 10
+
+[node name="text_sat" type="TextEdit" parent="panel/margin/list"]
+margin_top = 110.0
+margin_right = 395.0
+margin_bottom = 130.0
+rect_min_size = Vector2( 0, 20 )
+custom_constants/line_spacing = 0
+text = "0"
+caret_blink = true
+
+[node name="HSeparator2" type="HSeparator" parent="panel/margin/list"]
+margin_top = 133.0
+margin_right = 395.0
+margin_bottom = 145.0
+rect_min_size = Vector2( 0, 12 )
+
+[node name="label_light" type="Label" parent="panel/margin/list"]
+margin_top = 148.0
+margin_right = 395.0
+margin_bottom = 162.0
+text = "Lightness"
+align = 1
+
+[node name="slider_light" type="HSlider" parent="panel/margin/list"]
+margin_top = 165.0
+margin_right = 395.0
+margin_bottom = 181.0
+min_value = -0.5
+max_value = 0.5
+step = 0.01
+tick_count = 10
+
+[node name="text_light" type="TextEdit" parent="panel/margin/list"]
+margin_top = 184.0
+margin_right = 395.0
+margin_bottom = 204.0
+rect_min_size = Vector2( 0, 20 )
+custom_constants/line_spacing = 0
+text = "0"
+caret_blink = true
+
+[node name="HSeparator3" type="HSeparator" parent="panel/margin/list"]
+margin_top = 207.0
+margin_right = 395.0
+margin_bottom = 219.0
+rect_min_size = Vector2( 0, 12 )
+
+[node name="label_contrast" type="Label" parent="panel/margin/list"]
+margin_top = 222.0
+margin_right = 395.0
+margin_bottom = 236.0
+text = "Contrast"
+align = 1
+
+[node name="slider_contrast" type="HSlider" parent="panel/margin/list"]
+margin_top = 239.0
+margin_right = 395.0
+margin_bottom = 255.0
+max_value = 2.0
+step = 0.01
+value = 1.0
+tick_count = 10
+
+[node name="text_contrast" type="TextEdit" parent="panel/margin/list"]
+margin_top = 258.0
+margin_right = 395.0
+margin_bottom = 278.0
+rect_min_size = Vector2( 0, 20 )
+custom_constants/line_spacing = 0
+text = "1"
+caret_blink = true
+
+[node name="HSeparator6" type="HSeparator" parent="panel/margin/list"]
+margin_top = 281.0
+margin_right = 395.0
+margin_bottom = 293.0
+rect_min_size = Vector2( 0, 12 )
+
+[node name="label_bright" type="Label" parent="panel/margin/list"]
+margin_top = 296.0
+margin_right = 395.0
+margin_bottom = 310.0
+text = "Brightness"
+align = 1
+
+[node name="slider_bright" type="HSlider" parent="panel/margin/list"]
+margin_top = 313.0
+margin_right = 395.0
+margin_bottom = 329.0
+min_value = -1.0
+max_value = 1.0
+step = 0.01
+tick_count = 10
+
+[node name="text_bright" type="TextEdit" parent="panel/margin/list"]
+margin_top = 332.0
+margin_right = 395.0
+margin_bottom = 352.0
+rect_min_size = Vector2( 0, 20 )
+custom_constants/line_spacing = 0
+text = "0"
+caret_blink = true
+
+[node name="HSeparator7" type="HSeparator" parent="panel/margin/list"]
+margin_top = 355.0
+margin_right = 395.0
+margin_bottom = 367.0
+rect_min_size = Vector2( 0, 12 )
+
+[node name="label_alpha" type="Label" parent="panel/margin/list"]
+margin_top = 370.0
+margin_right = 395.0
+margin_bottom = 384.0
+text = "Alpha"
+align = 1
+
+[node name="slider_alpha" type="HSlider" parent="panel/margin/list"]
+margin_top = 387.0
+margin_right = 395.0
+margin_bottom = 403.0
+max_value = 1.0
+step = 0.01
+value = 1.0
+tick_count = 10
+
+[node name="text_alpha" type="TextEdit" parent="panel/margin/list"]
+margin_top = 406.0
+margin_right = 395.0
+margin_bottom = 426.0
+rect_min_size = Vector2( 0, 20 )
+custom_constants/line_spacing = 0
+text = "1"
+caret_blink = true
+
+[node name="HSeparator5" type="HSeparator" parent="panel/margin/list"]
+margin_top = 429.0
+margin_right = 395.0
+margin_bottom = 441.0
+rect_min_size = Vector2( 0, 12 )
+
+[node name="label_scale" type="Label" parent="panel/margin/list"]
+margin_top = 444.0
+margin_right = 395.0
+margin_bottom = 458.0
+text = "Scale (preview only)"
+align = 1
+
+[node name="slider_scale" type="HSlider" parent="panel/margin/list"]
+margin_top = 461.0
+margin_right = 395.0
+margin_bottom = 477.0
+min_value = 1.0
+max_value = 8.0
+value = 1.0
+tick_count = 8
+
+[node name="HSeparator4" type="HSeparator" parent="panel/margin/list"]
+margin_top = 480.0
+margin_right = 395.0
+margin_bottom = 492.0
+rect_min_size = Vector2( 0, 12 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="text_combine" type="TextEdit" parent="panel/margin/list"]
+margin_top = 495.0
+margin_right = 395.0
+margin_bottom = 515.0
+rect_min_size = Vector2( 0, 20 )
+custom_constants/line_spacing = 0
+text = "0"
+caret_blink = true
+
+[node name="HSeparator8" type="HSeparator" parent="panel/margin/list"]
+margin_top = 518.0
+margin_right = 395.0
+margin_bottom = 530.0
+rect_min_size = Vector2( 0, 12 )
+custom_constants/separation = 8
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Button" type="Button" parent="panel/margin/list"]
+margin_left = 326.0
+margin_top = 549.0
+margin_right = 395.0
+margin_bottom = 569.0
+size_flags_horizontal = 8
+size_flags_vertical = 10
+text = "Reset All"
+
+[node name="err" type="Label" parent="panel/margin/list"]
+modulate = Color( 0.952941, 0.0901961, 0.0901961, 1 )
+margin_top = 572.0
+margin_right = 395.0
+margin_bottom = 586.0
+align = 1
+
+[node name="center" type="CenterContainer" parent="."]
+anchor_right = 0.6
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Control" type="Control" parent="center"]
+margin_left = 307.0
+margin_top = 300.0
+margin_right = 307.0
+margin_bottom = 300.0
+
+[node name="Sprite" type="Sprite" parent="center/Control"]
+material = SubResource( 1 )
+texture = ExtResource( 1 )
+[connection signal="value_changed" from="panel/margin/list/slider_hue" to="." method="on_hue_changed"]
+[connection signal="value_changed" from="panel/margin/list/slider_sat" to="." method="on_sat_changed"]
+[connection signal="value_changed" from="panel/margin/list/slider_light" to="." method="_on_lightness_changed"]
+[connection signal="value_changed" from="panel/margin/list/slider_contrast" to="." method="on_contrast_changed"]
+[connection signal="value_changed" from="panel/margin/list/slider_bright" to="." method="on_brightness_changed"]
+[connection signal="value_changed" from="panel/margin/list/slider_alpha" to="." method="on_alpha_changed"]
+[connection signal="value_changed" from="panel/margin/list/slider_scale" to="." method="on_scale_changed"]
+[connection signal="pressed" from="panel/margin/list/Button" to="." method="on_reset_pressed"]
