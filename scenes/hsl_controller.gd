@@ -14,6 +14,7 @@ onready var text_bright = $"panel/margin/list/text_bright"
 onready var sprite = $"center/Control/Sprite"
 onready var text_err = $"panel/margin/list/err"
 onready var text_all = $"panel/margin/list/text_combine"
+onready var text_bg = $"bgcolor_panel/TextEdit"
 
 var sprite_hsv = Vector3(0, 0, 0)
 var sprite_bca = Vector3(0, 1, 1)
@@ -104,3 +105,8 @@ func on_reset_pressed():
 	s_cont.value = 1
 	var s_alpha = $"panel/margin/list/slider_alpha"
 	s_alpha.value = 1
+
+
+func _on_colour_text_changed():
+	var parsed = Color(text_bg.text)
+	VisualServer.set_default_clear_color(parsed)
