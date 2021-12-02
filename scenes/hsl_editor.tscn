@@ -315,6 +315,7 @@ text = "#4C4C4C"
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
 [connection signal="value_changed" from="panel/margin/list/slider_hue" to="." method="on_hue_changed"]
 [connection signal="value_changed" from="panel/margin/list/slider_sat" to="." method="on_sat_changed"]
 [connection signal="value_changed" from="panel/margin/list/slider_light" to="." method="_on_lightness_changed"]
