@@ -1,8 +1,40 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://scenes/gms_map.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scenes/light_editor.gd" type="Script" id=2]
 
-[node name="light_editor" type="Node2D"]
+[node name="light_editor" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="gms_map" parent="." instance=ExtResource( 1 )]
 room_path = "C:\\Users\\Noxid\\Documents\\dev\\GitHub\\Unmend-Project\\VernalEdge\\rooms\\arboretum_new_mainhall\\arboretum_new_mainhall.yy"
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -43.0
+margin_top = -40.0
+margin_right = -3.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Panel" type="Panel" parent="."]
+anchor_bottom = 1.0
+margin_right = 201.0
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel/ScrollContainer"]
