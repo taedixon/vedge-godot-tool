@@ -59,13 +59,15 @@
 [ext_resource path="res://img/grass_batch/s_grass_prop_03.png" type="Texture" id=57]
 [ext_resource path="res://img/grass_batch/s_grass_prop_04.png" type="Texture" id=58]
 
-[node name="Node2D" type="Node2D"]
+[node name="plant_thing" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
 script = ExtResource( 23 )
 __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="assets" type="Node" parent="."]
+[node name="assets" type="Node2D" parent="."]
 
 [node name="Sprite" parent="assets" instance=ExtResource( 30 )]
 position = Vector2( 47.5187, -219.102 )
@@ -477,10 +479,10 @@ script = ExtResource( 24 )
 weight_end = Vector2( 0, -36 )
 
 [node name="output" type="TextEdit" parent="."]
-margin_left = 673.0
-margin_top = 1.0
-margin_right = 1023.0
-margin_bottom = 597.0
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -378.0
 __meta__ = {
 "_edit_use_anchors_": false
 }

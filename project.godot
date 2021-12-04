@@ -27,12 +27,13 @@ _global_script_class_icons={
 [application]
 
 config/name="vedge-tools"
-run/main_scene="res://scenes/light_editor.tscn"
+run/main_scene="res://ui/ui_main.tscn"
 config/icon="res://icon.png"
 
 [autoload]
 
 GmsAssetCache="*res://util/GmsAssetCache.gd"
+Config="*res://util/Config.gd"
 
 [importer_defaults]
 

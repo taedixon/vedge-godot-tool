@@ -39,6 +39,7 @@ func add_asset_layer(layer):
 		spr.rotation_degrees = -asset.rotation
 		spr.scale = Vector2(asset.scaleX, asset.scaleY)
 		base.add_child(spr)
+	base.name = layer.name
 	return base
 
 func add_tile_layer(layer):
@@ -59,4 +60,5 @@ func add_tile_layer(layer):
 			tx = 0
 			ty += 1
 	tmap.visible = layer.visible
+	tmap.name = layer.name
 	return tmap

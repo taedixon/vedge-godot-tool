@@ -1,0 +1,82 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://ui/project_select.gd" type="Script" id=1]
+
+[node name="project_select" type="Popup"]
+margin_right = 434.0
+margin_bottom = 170.0
+grow_horizontal = 2
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Panel" type="Panel" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -202.0
+margin_top = 16.0
+margin_right = 202.0
+margin_bottom = 120.0
+custom_constants/separation = 16
+alignment = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="Panel/VBoxContainer"]
+margin_left = 124.0
+margin_top = 7.0
+margin_right = 280.0
+margin_bottom = 21.0
+size_flags_horizontal = 4
+text = "Select GMS2 Project File"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel/VBoxContainer"]
+margin_top = 37.0
+margin_right = 404.0
+margin_bottom = 61.0
+size_flags_stretch_ratio = 1.92
+alignment = 1
+
+[node name="project_input" type="LineEdit" parent="Panel/VBoxContainer/HBoxContainer"]
+margin_right = 329.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+caret_blink = true
+caret_blink_speed = 0.5
+
+[node name="Button" type="Button" parent="Panel/VBoxContainer/HBoxContainer"]
+margin_left = 333.0
+margin_right = 404.0
+margin_bottom = 24.0
+text = "Browse..."
+
+[node name="Button" type="Button" parent="Panel/VBoxContainer"]
+margin_left = 156.0
+margin_top = 77.0
+margin_right = 247.0
+margin_bottom = 97.0
+size_flags_horizontal = 4
+text = "Load project"
+
+[node name="error" type="Label" parent="Panel/VBoxContainer"]
+visible = false
+margin_top = 106.0
+margin_right = 404.0
+margin_bottom = 120.0
+custom_colors/font_color = Color( 0.972549, 0.294118, 0.294118, 1 )
+text = "Not a valid project file!"
+
+[connection signal="pressed" from="Panel/VBoxContainer/HBoxContainer/Button" to="." method="on_browse"]
+[connection signal="pressed" from="Panel/VBoxContainer/Button" to="." method="on_submit"]
