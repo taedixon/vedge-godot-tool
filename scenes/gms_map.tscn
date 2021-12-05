@@ -6,6 +6,3 @@
 script = ExtResource( 1 )
 
 [node name="tile_layers" type="Node2D" parent="."]
-
-[node name="tile_spritesheet" type="Sprite" parent="."]
-centered = false

@@ -38,6 +38,8 @@ func on_menu_tool(id):
 			next_scene = scn_plants.instance()
 		2:
 			next_scene = scn_lights.instance()
+			if (!GmsAssetCache.project_loaded()):
+				$project_select.popup_centered()
 	if next_scene:
 		scene_container.add_child(next_scene)
 		active_scene = next_scene

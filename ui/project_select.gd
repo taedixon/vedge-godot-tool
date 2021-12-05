@@ -1,7 +1,5 @@
 extends Popup
 
-signal project_chosen(path, project_data)
-
 # Declare member variables here. Examples:
 onready var input = $Panel/VBoxContainer/HBoxContainer/project_input
 onready var error_text = $Panel/VBoxContainer/error
@@ -30,11 +28,9 @@ func on_file_selected(path):
 	
 func on_submit():
 	error_text.visible = false
-	var try_load = GmsTool.load_yy(input.text)
-	if try_load && try_load.resourceType == "GMProject":
+	if GmsAssetCache.set_project(input.text):
 		Config.config.set_value("paths", "last_project_file", input.text)
 		Config.save()
-		emit_signal("project_chosen", input.text, try_load)
 		hide()
 	else:
 		error_text.visible = true
