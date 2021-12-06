@@ -100,7 +100,6 @@ func build_mesh():
 	surf_point.commit(pointmesh)
 	mesh.mesh = newmesh
 	_showpoint.mesh = pointmesh
-	_showpoint.visible = false
 	var mesh_mat = ShaderMaterial.new()
 	if light_data.get("is_glow") == "True":
 		mesh_mat.shader = light_mat
@@ -135,33 +134,40 @@ func add_stroke_point(button, point: Vector2, params):
 	else:
 		current_stroke.count += 1
 		
-	var xmin = ceil((point.x - params.radius)/16.0)
-	var xmax = floor((point.x + params.radius)/16.0)
-	var ymin = ceil((point.y - params.radius)/16.0)
-	var ymax = floor((point.y + params.radius)/16.0)
+	var xmin = max(0, ceil((point.x - params.radius)/16.0))
+	var xmax = min(tile_w - 1, floor((point.x + params.radius)/16.0))
+	var ymin = max(0, ceil((point.y - params.radius)/16.0))
+	var ymax = min(tile_h - 1, floor((point.y + params.radius)/16.0))
 	
 	for tx in range(xmin, xmax+1):
 		for ty in range(ymin, ymax+1):
 			var strength
+			var tilecoord = Vector2(tx*16, ty*16)
 			match params.falloff:
 				"CONST":
-					strength = 1
+					if point.distance_to(tilecoord) <= params.radius:
+						strength = 1
+					else:
+						strength = 0
 				"LINEAR":
-					strength = 1.0-(point.distance_to(Vector2(tx*16, ty*16))/params.radius)
+					strength = 1.0-(point.distance_to(tilecoord)/params.radius)
 				"SQUARE":
-					strength = 1.0 - pow(point.distance_to(Vector2(tx*16, ty*16))/params.radius, 2.0)
-			strength *= 0.1
-			var encode = encode_pair(tx, ty)
-			if encode in current_stroke.points:
-				var current = current_stroke.points[encode]
-				current_stroke.points[encode] = min(current + strength, 1)
-			else:
-				current_stroke.points[encode] = strength
+					strength = pow(1.0 - (point.distance_to(tilecoord)/params.radius), 2.0)
+			strength *= current_stroke.colour.a
+			if strength > 0:
+				var encode = encode_pair(tx, ty)
+				if encode in current_stroke.points:
+					var current = current_stroke.points[encode]
+					current_stroke.points[encode] = min(current + strength, 1)
+				else:
+					current_stroke.points[encode] = strength
 				
-	if current_stroke.count > 32:
+	if current_stroke.count > 12:
 		end_stroke(params)
 		
 func end_stroke(params):
+	if !current_stroke:
+		return
 	var drawcol = current_stroke.colour
 	for key in current_stroke.points.keys():
 		var xy = decode_pair(key)

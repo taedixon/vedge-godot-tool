@@ -124,3 +124,7 @@ func set_active_layer(layer):
 func add_stroke_point(mb, params):
 	if active_layer:
 		active_layer.add_stroke_point(mb, get_local_mouse_position(), params)
+
+func end_stroke(params):
+	if active_layer:
+		active_layer.end_stroke(params)
