@@ -114,6 +114,9 @@ func find_light_layers(roomdata):
 func _draw():
 	draw_rect(bounds, Color.cyan, false)
 	
+func layer_editable():
+	return active_layer != null && active_layer.visible
+	
 func set_active_layer(layer):
 	active_layer = null
 	for node in layers_root.get_children():
@@ -122,9 +125,13 @@ func set_active_layer(layer):
 			break;
 	
 func add_stroke_point(mb, params):
-	if active_layer:
+	if layer_editable():
 		active_layer.add_stroke_point(mb, get_local_mouse_position(), params)
 
-func end_stroke(params):
-	if active_layer:
-		active_layer.end_stroke(params)
+func end_stroke():
+	if layer_editable():
+		active_layer.end_stroke()
+
+func get_picked_colour():
+	if layer_editable():
+		return active_layer.get_colour(get_local_mouse_position())

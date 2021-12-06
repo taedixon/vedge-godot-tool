@@ -143,17 +143,16 @@ func add_stroke_point(button, point: Vector2, params):
 		for ty in range(ymin, ymax+1):
 			var strength
 			var tilecoord = Vector2(tx*16, ty*16)
+			var exponent
 			match params.falloff:
 				"CONST":
-					if point.distance_to(tilecoord) <= params.radius:
-						strength = 1
-					else:
-						strength = 0
+					exponent = 0
 				"LINEAR":
-					strength = 1.0-(point.distance_to(tilecoord)/params.radius)
+					exponent = 1
 				"SQUARE":
-					strength = pow(1.0 - (point.distance_to(tilecoord)/params.radius), 2.0)
-			strength *= current_stroke.colour.a
+					exponent = 2
+			strength = pow(max(0, 1.0 - (point.distance_to(tilecoord)/params.radius)), exponent)
+			strength *= params.mix_amount
 			if strength > 0:
 				var encode = encode_pair(tx, ty)
 				if encode in current_stroke.points:
@@ -163,9 +162,9 @@ func add_stroke_point(button, point: Vector2, params):
 					current_stroke.points[encode] = strength
 				
 	if current_stroke.count > 12:
-		end_stroke(params)
+		end_stroke()
 		
-func end_stroke(params):
+func end_stroke():
 	if !current_stroke:
 		return
 	var drawcol = current_stroke.colour
@@ -178,10 +177,15 @@ func end_stroke(params):
 		colour_data[col_idx] = curcol.blend(drawcol)
 	build_mesh()
 	current_stroke = null
-	
 
 func encode_pair(x, y):
 	return x*10000 + y
 	
 func decode_pair(n):
 	return [floor(n/10000), n % 10000]
+
+func get_colour(mousepos):
+	var x = clamp(floor(mousepos.x/16), 0, tile_w-1)
+	var y = clamp(floor(mousepos.y/16), 0, tile_h-1)
+	var col_idx = _p(x, y)
+	return colour_data[col_idx]

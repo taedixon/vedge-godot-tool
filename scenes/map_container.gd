@@ -1,5 +1,7 @@
 extends Control
 
+signal colour_picked(mousebutton, colour)
+
 
 # Declare member variables here. Examples:
 onready var map = $gms_map
@@ -7,10 +9,12 @@ var active_layer = null
 var last_mouse_pos = Vector2()
 var mouse_travel = 0
 var draw_param = {
+	"tool": "DRAW",
 	"radius": 32,
 	"col_lmb": Color.maroon,
 	"col_rmb": Color.darkslateblue,
-	"falloff": "SQUARE"
+	"falloff": "SQUARE",
+	"mix": 0.5,
 }
 
 # Called when the node enters the scene tree for the first time.
@@ -59,13 +63,21 @@ func _process(delta):
 		mb = BUTTON_LEFT
 	elif (Input.get_mouse_button_mask() & BUTTON_MASK_RIGHT) != 0:
 		mb = BUTTON_RIGHT
-	if mb != 0:
-		if mouse_travel > 2:
-			map.add_stroke_point(mb, draw_param)
-			mouse_travel = 0
-	else:
-		mouse_travel = 0
-		map.end_stroke(draw_param)
+		
+	match draw_param.tool:
+		"DRAW":
+			if mb != 0:
+				if mouse_travel > 2:
+					map.add_stroke_point(mb, draw_param)
+					mouse_travel = 0
+			else:
+				mouse_travel = 0
+				map.end_stroke()
+		"PICK":
+			if mb != 0:
+				var col = map.get_picked_colour()
+				if col:
+					emit_signal("colour_picked", mb, col)
 		
 func on_focus_loss():
 	update()
@@ -76,11 +88,25 @@ func on_focus_gain():
 func _draw():
 	if has_focus():
 		draw_rect(Rect2(0, 0, rect_size.x, rect_size.y), Color.wheat, false)
-		draw_arc(last_mouse_pos, draw_param.radius * map.scale.x, 0, 2*PI, 16, Color.magenta)
+		if map.layer_editable():
+			match draw_param.tool:
+				"DRAW":
+					draw_arc(last_mouse_pos, draw_param.radius * map.scale.x, 0, 2*PI, 16, Color.magenta)
+				"PICK":
+					var drawcol = map.get_picked_colour()
+					if !drawcol:
+						drawcol = Color.black
+					draw_circle(last_mouse_pos, 6, drawcol)
+		else:
+			var offsetA = Vector2(8, 8)
+			var offsetB = Vector2(-8, 8)
+			draw_line(last_mouse_pos + offsetA, last_mouse_pos - offsetA, Color.red, 2)
+			draw_line(last_mouse_pos + offsetB, last_mouse_pos - offsetB, Color.red, 2)
+				
 
 func on_mouse_exit():
 	release_focus()
-	map.end_stroke(draw_param)
+	map.end_stroke()
 
 func on_mouse_enter():
 	grab_focus()

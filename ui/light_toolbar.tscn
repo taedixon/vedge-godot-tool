@@ -15,49 +15,72 @@ margin_left = 7.0
 margin_top = 7.0
 margin_right = 1017.0
 margin_bottom = 49.0
-custom_constants/hseparation = 16
-columns = 4
+custom_constants/hseparation = 20
+columns = 6
+
+[node name="label_tool" type="Label" parent="GridContainer"]
+margin_right = 69.0
+margin_bottom = 14.0
+text = "TOOL"
 
 [node name="label_col_lmb" type="Label" parent="GridContainer"]
-margin_right = 28.0
+margin_left = 89.0
+margin_right = 117.0
 margin_bottom = 14.0
 text = "LMB"
 
 [node name="label_col_rmb" type="Label" parent="GridContainer"]
-margin_left = 44.0
-margin_right = 73.0
+margin_left = 137.0
+margin_right = 166.0
 margin_bottom = 14.0
 text = "RMB"
 
 [node name="label_brush_size" type="Label" parent="GridContainer"]
-margin_left = 89.0
-margin_right = 163.0
+margin_left = 186.0
+margin_right = 261.0
 margin_bottom = 14.0
-text = "BRUSHSIZE"
+text = "BRUSH SIZE"
 
-[node name="Label" type="Label" parent="GridContainer"]
-margin_left = 179.0
-margin_right = 254.0
+[node name="label_falloff" type="Label" parent="GridContainer"]
+margin_left = 281.0
+margin_right = 356.0
 margin_bottom = 14.0
 text = "FALLOFF"
 
+[node name="label_mix" type="Label" parent="GridContainer"]
+margin_left = 376.0
+margin_right = 471.0
+margin_bottom = 14.0
+text = "MIX STRENGTH"
+
+[node name="tool_select" type="OptionButton" parent="GridContainer"]
+margin_top = 18.0
+margin_right = 69.0
+margin_bottom = 42.0
+text = "DRAW"
+items = [ "DRAW", null, false, 0, null, "PICK", null, false, 1, null ]
+selected = 0
+
 [node name="col_lmb" type="ColorPickerButton" parent="GridContainer"]
-margin_top = 18.0
-margin_right = 28.0
-margin_bottom = 42.0
-color = Color( 0.176471, 0.109804, 0.309804, 0.196078 )
-
-[node name="col_rmb" type="ColorPickerButton" parent="GridContainer"]
-margin_left = 44.0
-margin_top = 18.0
-margin_right = 73.0
-margin_bottom = 42.0
-color = Color( 1, 1, 1, 0.290196 )
-
-[node name="radius_select" type="SpinBox" parent="GridContainer"]
 margin_left = 89.0
 margin_top = 18.0
-margin_right = 163.0
+margin_right = 117.0
+margin_bottom = 42.0
+color = Color( 0.176471, 0.109804, 0.309804, 1 )
+edit_alpha = false
+
+[node name="col_rmb" type="ColorPickerButton" parent="GridContainer"]
+margin_left = 137.0
+margin_top = 18.0
+margin_right = 166.0
+margin_bottom = 42.0
+color = Color( 1, 1, 1, 1 )
+edit_alpha = false
+
+[node name="radius_select" type="SpinBox" parent="GridContainer"]
+margin_left = 186.0
+margin_top = 18.0
+margin_right = 261.0
 margin_bottom = 42.0
 min_value = 16.0
 max_value = 320.0
@@ -65,15 +88,32 @@ step = 8.0
 value = 32.0
 
 [node name="falloff_select" type="OptionButton" parent="GridContainer"]
-margin_left = 179.0
+margin_left = 281.0
 margin_top = 18.0
-margin_right = 254.0
+margin_right = 356.0
 margin_bottom = 42.0
 text = "LINEAR"
 items = [ "CONST", null, false, 0, null, "LINEAR", null, false, 1, null, "SQUARE", null, false, 2, null ]
 selected = 1
 
+[node name="mix_strength" type="HSlider" parent="GridContainer"]
+margin_left = 376.0
+margin_top = 18.0
+margin_right = 471.0
+margin_bottom = 34.0
+min_value = 0.01
+max_value = 1.0
+step = 0.01
+value = 0.5
+tick_count = 5
+ticks_on_borders = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="item_selected" from="GridContainer/tool_select" to="." method="on_tool_change"]
 [connection signal="color_changed" from="GridContainer/col_lmb" to="." method="on_col_lmb_change"]
 [connection signal="color_changed" from="GridContainer/col_rmb" to="." method="on_col_rmb_change"]
 [connection signal="value_changed" from="GridContainer/radius_select" to="." method="on_radius_change"]
 [connection signal="item_selected" from="GridContainer/falloff_select" to="." method="on_falloff_change"]
+[connection signal="value_changed" from="GridContainer/mix_strength" to="." method="on_mix_change"]

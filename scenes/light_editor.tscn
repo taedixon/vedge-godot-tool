@@ -81,6 +81,7 @@ size_flags_horizontal = 3
 [node name="light_toolbar" parent="." instance=ExtResource( 3 )]
 margin_left = 253.0
 
+[connection signal="colour_picked" from="map_container" to="light_toolbar" method="on_colour_pick"]
 [connection signal="focus_entered" from="map_container" to="map_container" method="on_focus_gain"]
 [connection signal="focus_exited" from="map_container" to="map_container" method="on_focus_loss"]
 [connection signal="mouse_entered" from="map_container" to="map_container" method="on_mouse_enter"]
