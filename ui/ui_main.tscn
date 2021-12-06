@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://ui/project_select.tscn" type="PackedScene" id=1]
 [ext_resource path="res://ui/ui_main.gd" type="Script" id=2]
+[ext_resource path="res://scenes/light_editor.tscn" type="PackedScene" id=3]
 
 [node name="ui_main" type="Control"]
 anchor_right = 1.0
@@ -21,6 +22,8 @@ rect_clip_content = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="light_editor" parent="active_scene" instance=ExtResource( 3 )]
 
 [node name="menu_bar" type="Panel" parent="."]
 anchor_right = 1.0

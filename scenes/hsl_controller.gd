@@ -23,9 +23,8 @@ var sprite_bca = Vector3(0, 1, 1)
 func _ready():
 	var loop = load("res://mainloop.gd")
 	get_tree().set_script(loop)
-	get_tree().connect("file_drop", self, "on_file_drop")
-	pass # Replace with function body.
-
+	var err = get_tree().connect("file_drop", self, "on_file_drop")
+	assert (err == 0)
 
 func on_file_drop(files):
 	var f = files[0] as String

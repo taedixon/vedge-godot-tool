@@ -16,7 +16,7 @@ func _ready():
 
 func set_room_path(p):
 	room_path = p
-	if typeof(room_path) == TYPE_STRING && layers_root:
+	if typeof(room_path) == TYPE_STRING && room_path.length() > 0 && layers_root:
 		_roomdata = load_room_data(room_path)
 
 func load_room_data(path):
@@ -46,6 +46,7 @@ func populate_map(roomdata):
 		layers_root.add_child(i)
 		
 	bounds.size = Vector2(roomdata.roomSettings.Width,roomdata.roomSettings.Height)
+	position = -bounds.size / 2
 	update()
 		
 func add_asset_layer(layer):

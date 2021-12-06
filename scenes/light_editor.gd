@@ -11,44 +11,24 @@ onready var roomfilter = $Panel/TabContainer/Rooms/room_filter
 var scn_layer_item = preload("res://ui/layer_list_item.tscn")
 var roomlist_content = []
 
-
 func _ready():
 	if GmsAssetCache.project_loaded():
 		set_room_list()
-	GmsAssetCache.connect("project_changed", self, "on_project_change")
+	var err = GmsAssetCache.connect("project_changed", self, "on_project_change")
+	assert (err == 0)
 	roomlist.connect("item_selected", self, "on_room_select")
 
 func on_project_change():
 	map.room_path = ""
 	set_room_list()
-	
+
 func on_room_select(idx):
 	var room_path = roomlist_content[idx].path
 	map.room_path = room_path
 	set_layer_list(room_path)
-	
+
 func on_filter_change(_newtext):
 	set_room_list()
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	if !mapcontainer.has_focus():
-		return
-	var translate_spd = 500
-	if Input.is_key_pressed(KEY_SHIFT):
-		translate_spd *= 2
-	translate_spd *= max(1, map.scale.x)
-	map.position.x += Input.get_action_strength("scroll_left") * translate_spd * delta
-	map.position.x -= Input.get_action_strength("scroll_right") * translate_spd *  delta
-	map.position.y += Input.get_action_strength("scroll_up") * translate_spd *  delta
-	map.position.y -= Input.get_action_strength("scroll_down") * translate_spd *  delta
-	if Input.is_action_just_released("map_zoom_in"):
-		map.scale += Vector2(0.1, 0.1)
-	if Input.is_action_just_released("map_zoom_out"):
-		if map.scale.x > 0.1:
-			map.scale -= Vector2(0.1, 0.1)
-	if Input.is_action_just_pressed("map_zoom_reset"):
-		map.scale = Vector2(1, 1)
 
 func set_room_list():
 	roomlist.clear()
