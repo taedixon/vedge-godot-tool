@@ -18,6 +18,8 @@ const gaussian_55 = [
 	1.0/256, 4.0/256, 6.0/256, 4.0/256, 1.0/256,
 ]
 
+var current_stroke = null
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	if layer_data && light_data && !mesh.mesh:
@@ -117,3 +119,63 @@ func build_mesh():
 	
 	mesh.material = mesh_mat
 	
+func add_stroke_point(button, point: Vector2, params):
+		
+	if current_stroke == null:
+		var drawcol
+		if button == BUTTON_LEFT:
+			drawcol = params.col_lmb
+		else:
+			drawcol = params.col_rmb
+		current_stroke = {
+			"count": 1, 
+			"points": {},
+			"colour": drawcol,
+		}
+	else:
+		current_stroke.count += 1
+		
+	var xmin = ceil((point.x - params.radius)/16.0)
+	var xmax = floor((point.x + params.radius)/16.0)
+	var ymin = ceil((point.y - params.radius)/16.0)
+	var ymax = floor((point.y + params.radius)/16.0)
+	
+	for tx in range(xmin, xmax+1):
+		for ty in range(ymin, ymax+1):
+			var strength
+			match params.falloff:
+				"CONST":
+					strength = 1
+				"LINEAR":
+					strength = 1.0-(point.distance_to(Vector2(tx*16, ty*16))/params.radius)
+				"SQUARE":
+					strength = 1.0 - pow(point.distance_to(Vector2(tx*16, ty*16))/params.radius, 2.0)
+			strength *= 0.1
+			var encode = encode_pair(tx, ty)
+			if encode in current_stroke.points:
+				var current = current_stroke.points[encode]
+				current_stroke.points[encode] = min(current + strength, 1)
+			else:
+				current_stroke.points[encode] = strength
+				
+	if current_stroke.count > 32:
+		end_stroke(params)
+		
+func end_stroke(params):
+	var drawcol = current_stroke.colour
+	for key in current_stroke.points.keys():
+		var xy = decode_pair(key)
+		var strength = current_stroke.points[key]
+		var col_idx = _p(xy[0], xy[1])
+		var curcol = colour_data[col_idx] as Color
+		drawcol.a = strength
+		colour_data[col_idx] = curcol.blend(drawcol)
+	build_mesh()
+	current_stroke = null
+	
+
+func encode_pair(x, y):
+	return x*10000 + y
+	
+func decode_pair(n):
+	return [floor(n/10000), n % 10000]

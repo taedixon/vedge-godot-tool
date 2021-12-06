@@ -17,7 +17,7 @@ func _ready():
 	var menu_tool = $menu_bar/MarginContainer/HBoxContainer/menu_tool
 	menu_tool.get_popup().connect("id_pressed", self, "on_menu_tool")
 	# debug
-	GmsAssetCache.set_project("C:/Users/Noxid/Documents/dev/GitHub/Unmend-Project/VernalEdge/VernalEdge.yyp")
+	GmsAssetCache.set_project(Config.config.get_value("paths", "last_project_file"))
 
 
 func on_menu_file(id):

@@ -52,6 +52,14 @@ func _process(delta):
 		last_mouse_pos = mousepos
 		update()
 		
+	var mb = 0
+	if (Input.get_mouse_button_mask() & BUTTON_MASK_LEFT) != 0:
+		mb = BUTTON_LEFT
+	elif (Input.get_mouse_button_mask() & BUTTON_MASK_RIGHT) != 0:
+		mb = BUTTON_RIGHT
+	if mb != 0:
+		map.add_stroke_point(mb, draw_param)
+		
 func on_focus_loss():
 	update()
 

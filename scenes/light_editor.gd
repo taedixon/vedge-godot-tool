@@ -9,6 +9,7 @@ onready var layerlist = $Panel/TabContainer/Layers/layer_items
 onready var roomfilter = $Panel/TabContainer/Rooms/room_filter
 
 var scn_layer_item = preload("res://ui/layer_list_item.tscn")
+var style_panel_select = preload("res://style/style_panel_selected.tres")
 var roomlist_content = []
 
 func _ready():
@@ -51,4 +52,14 @@ func set_layer_list(room_path):
 			listitem.layer_name = layer.name
 			listitem.layer_visible = layer.visible
 			listitem.connect("visible_toggled", map, "layer_toggle_visible")
+			listitem.connect("layer_selected", self, "on_layer_select")
+			listitem.selectable = layer.name in map.light_layers
 			layerlist.add_child(listitem)
+
+func on_layer_select(layer):
+	for child in layerlist.get_children():
+		if child is Control && child.layer_name == layer:
+			child.add_stylebox_override("panel", style_panel_select)
+		else:
+			child.add_stylebox_override("panel", null)
+	map.set_active_layer(layer)

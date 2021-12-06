@@ -9,6 +9,8 @@ var scn_light_layer = preload("res://scenes/light_layer.tscn")
 
 var light_layers = {}
 
+var active_layer = null
+
 var bounds = Rect2(0, 0, 0, 0)
 
 func _ready():
@@ -21,6 +23,7 @@ func set_room_path(p):
 
 func load_room_data(path):
 	_roomdata = GmsAssetCache.get_room(path)
+	active_layer = null
 	if _roomdata:
 		populate_map(_roomdata)
 		
@@ -110,3 +113,14 @@ func find_light_layers(roomdata):
 
 func _draw():
 	draw_rect(bounds, Color.cyan, false)
+	
+func set_active_layer(layer):
+	active_layer = null
+	for node in layers_root.get_children():
+		if node.name == layer:
+			active_layer = node
+			break;
+	
+func add_stroke_point(mb, params):
+	if active_layer:
+		active_layer.add_stroke_point(mb, get_local_mouse_position(), params)

@@ -25,6 +25,7 @@ margin_left = 449.0
 margin_top = 4.0
 margin_right = 525.0
 margin_bottom = 18.0
+mouse_filter = 1
 size_flags_horizontal = 6
 text = "Layer Name"
 
@@ -35,4 +36,5 @@ margin_bottom = 22.0
 toggle_mode = true
 icon = ExtResource( 1 )
 
+[connection signal="gui_input" from="." to="." method="on_input_event"]
 [connection signal="toggled" from="HBoxContainer/Button" to="." method="on_button_press"]
