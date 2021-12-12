@@ -5,12 +5,13 @@ var light_data = null
 var tile_w = 0
 var tile_h = 0
 
-const sector_w = 16
-const sector_h = 16
+const sector_w = 32
+const sector_h = 32
 var mesh_material = null
 var colour_data = {}
 onready var meshgroup = $group_mesh
 onready var pointgroup = $group_point
+onready var bridge_mesh = $inbetween
 
 var light_mat = preload("res://shadermat/shd_light_layer.gdshader") as Shader
 var dark_mat = preload("res://shadermat/shd_shadow_layer.gdshader") as Shader
@@ -37,6 +38,7 @@ func _ready():
 			build_mesh(sector)
 			meshgroup.add_child(sector.meshinst)
 			pointgroup.add_child(sector.pointinst)
+			create_bridge_mesh()
 		
 func sector_index(x, y):
 	return x + y * sector_w
@@ -110,6 +112,9 @@ func get_colour_sector(x, y):
 			"colour": colour,
 			"vertex": verts,
 			"dirty": false,
+			"dirty_bridge": false,
+			"bridge_right": false,
+			"bridge_down": false,
 		}
 	return colour_data[sector_key]
 
@@ -119,6 +124,8 @@ func set_vertex_colour(x, y, colour):
 	var local_y = y - sector.begin_y
 	sector.colour[sector_index(local_x, local_y)] = colour
 	sector.dirty = true
+	if (local_x == (sector_w-1) && sector.bridge_right) || (local_y == (sector_h-1) && sector.bridge_down):
+		sector.dirty_bridge = true
 	
 func get_vertex_colour(x, y):
 	var sector = get_colour_sector(x, y)
@@ -156,6 +163,66 @@ func build_mesh(sector):
 	arrays[ArrayMesh.ARRAY_INDEX] = sector_index_array
 	meshbuilder.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	sector.meshinst.mesh = meshbuilder
+	
+func create_bridge_mesh():
+	bridge_mesh.material = mesh_material
+	var meshbuilder = SurfaceTool.new()
+	meshbuilder.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for key in colour_data.keys():
+		var this_sec = colour_data[key]
+		var decoded = decode_pair(int(key))
+		var sector_x = decoded[0]
+		var sector_y = decoded[1]
+		var sec_right = colour_data.get(encode_pair(sector_x+1, sector_y))
+		var sec_down = colour_data.get(encode_pair(sector_x, sector_y+1))
+		var sec_diag = colour_data.get(encode_pair(sector_x+1, sector_y+1))
+		if sec_right:
+			this_sec.bridge_right = true
+			var x = sector_w-1
+			for y in range(0, sector_h-1):
+				var topleft = Vector2((x+this_sec.begin_x)*16, (y+this_sec.begin_y)*16)
+				var c1 = this_sec.colour[sector_index(x, y)]
+				var c2 = sec_right.colour[sector_index(0, y)]
+				var c3 = this_sec.colour[sector_index(x, y+1)]
+				var c4 = sec_right.colour[sector_index(0, y+1)]
+				tool_add_quad(meshbuilder, topleft, c1, c2, c3, c4)
+		if sec_down:
+			this_sec.bridge_down = true
+			var y = sector_h-1
+			for x in range(0, sector_w-1):
+				var topleft = Vector2((x+this_sec.begin_x)*16, (y+this_sec.begin_y)*16)
+				var c1 = this_sec.colour[sector_index(x, y)]
+				var c2 = this_sec.colour[sector_index(x+1, y)]
+				var c3 = sec_down.colour[sector_index(x, 0)]
+				var c4 = sec_down.colour[sector_index(x+1, 0)]
+				tool_add_quad(meshbuilder, topleft, c1, c2, c3, c4)
+		if sec_right && sec_down && sec_diag:
+			var topleft = Vector2((sec_diag.begin_x-1) * 16, (sec_diag.begin_y-1) * 16)
+			var c1 = this_sec.colour[sector_index(sector_w-1, sector_h-1)]
+			var c2 = sec_right.colour[sector_index(0, sector_h-1)]
+			var c3 = sec_down.colour[sector_index(sector_w-1, 0)]
+			var c4 = sec_diag.colour[0]
+			tool_add_quad(meshbuilder, topleft, c1, c2, c3, c4)
+	bridge_mesh.mesh = meshbuilder.commit()
+			
+func tool_add_quad(meshbuilder: SurfaceTool, topleft: Vector2, c1: Color, c2: Color, c3: Color, c4: Color):
+	var p1 = Vector3(topleft.x, topleft.y, 0)
+	var p2 = Vector3(topleft.x+16, topleft.y, 0)
+	var p3 = Vector3(topleft.x, topleft.y+16, 0)
+	var p4 = Vector3(topleft.x+16, topleft.y+16, 0)
+	meshbuilder.add_color(c1)
+	meshbuilder.add_vertex(p1)
+	meshbuilder.add_color(c2)
+	meshbuilder.add_vertex(p2)
+	meshbuilder.add_color(c4)
+	meshbuilder.add_vertex(p4)
+	
+	meshbuilder.add_color(c1)
+	meshbuilder.add_vertex(p1)
+	meshbuilder.add_color(c4)
+	meshbuilder.add_vertex(p4)
+	meshbuilder.add_color(c3)
+	meshbuilder.add_vertex(p3)
 	
 func add_stroke_point(button, point: Vector2, params):
 	if current_stroke == null:
@@ -216,10 +283,14 @@ func end_stroke():
 	update_dirty_sectors()
 
 func update_dirty_sectors():
+	var dirty_bridge = false
 	for sector in colour_data.values():
 		if sector.dirty:
 			build_mesh(sector)
 			sector.dirty = false
+		dirty_bridge = dirty_bridge || sector.dirty_bridge
+	if dirty_bridge:
+		create_bridge_mesh()
 
 func encode_pair(x, y):
 	return x*10000 + y

@@ -67,7 +67,7 @@ func _process(delta):
 	match draw_param.tool:
 		"DRAW":
 			if mb != 0:
-				if mouse_travel > 2:
+				if mouse_travel > 4:
 					map.add_stroke_point(mb, draw_param)
 					mouse_travel = 0
 			else:

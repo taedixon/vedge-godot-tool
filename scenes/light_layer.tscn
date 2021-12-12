@@ -8,3 +8,5 @@ script = ExtResource( 1 )
 [node name="group_mesh" type="Node2D" parent="."]
 
 [node name="group_point" type="Node2D" parent="."]
+
+[node name="inbetween" type="MeshInstance2D" parent="."]
