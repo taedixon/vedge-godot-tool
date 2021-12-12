@@ -120,7 +120,7 @@ func layer_editable():
 func set_active_layer(layer):
 	active_layer = null
 	for node in layers_root.get_children():
-		if node.name == layer:
+		if node.name == layer && node.name in light_layers:
 			active_layer = node
 			break;
 	

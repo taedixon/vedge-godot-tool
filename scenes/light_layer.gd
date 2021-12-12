@@ -2,11 +2,15 @@ extends Node2D
 
 var layer_data = null
 var light_data = null
-var colour_data = []
 var tile_w = 0
 var tile_h = 0
-onready var mesh = $mesh
-onready var _showpoint = $points
+
+const sector_w = 16
+const sector_h = 16
+var mesh_material = null
+var colour_data = {}
+onready var meshgroup = $group_mesh
+onready var pointgroup = $group_point
 
 var light_mat = preload("res://shadermat/shd_light_layer.gdshader") as Shader
 var dark_mat = preload("res://shadermat/shd_shadow_layer.gdshader") as Shader
@@ -18,13 +22,35 @@ const gaussian_55 = [
 	1.0/256, 4.0/256, 6.0/256, 4.0/256, 1.0/256,
 ]
 
+var sector_index_array = PoolIntArray()
+
 var current_stroke = null
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	if layer_data && light_data && !mesh.mesh:
+	build_sector_indexes()
+	if layer_data && light_data:
+		mesh_material = get_mesh_material()
+		colour_data = {}
 		build_colors()
-		build_mesh()
+		for sector in colour_data.values():
+			build_mesh(sector)
+			meshgroup.add_child(sector.meshinst)
+			pointgroup.add_child(sector.pointinst)
+		
+func sector_index(x, y):
+	return x + y * sector_w
+
+func build_sector_indexes():
+	for y in range(0, sector_h-1):
+		for x in range(0, sector_w-1):
+			sector_index_array.append(sector_index(x, y))
+			sector_index_array.append(sector_index(x+1, y))
+			sector_index_array.append(sector_index(x+1, y+1))
+			
+			sector_index_array.append(sector_index(x, y))
+			sector_index_array.append(sector_index(x+1, y+1))
+			sector_index_array.append(sector_index(x, y+1))
 
 func build_colors():
 	var tileset_img = GmsAssetCache.get_tileset(layer_data.tilesetId.path).image as Image
@@ -44,7 +70,6 @@ func build_colors():
 	blend_color(raw_color)
 
 func blend_color(raw_color):
-	colour_data = PoolColorArray()
 	for ty in tile_h:
 		for tx in tile_w:
 			var aggregate = Color()
@@ -56,50 +81,52 @@ func blend_color(raw_color):
 					var rawval = raw_color[_p(sample_x, sample_y)] as Color
 					aggregate += rawval * gaussian_fac
 			aggregate.a = 1
-			colour_data.append(aggregate)
+			set_vertex_colour(tx, ty, aggregate)
+
+func get_colour_sector(x, y):
+	var sector_x = floor(x/sector_w)
+	var sector_y = floor(y/sector_h)
+	var sector_key = encode_pair(sector_x, sector_y)
+	if !sector_key in colour_data:
+		var verts = []
+		var colour = []
+		var basex = sector_x * sector_w * 16
+		var basey = sector_y * sector_h * 16
+		for y in range(0, sector_h):
+			for x in range(0, sector_w):
+				verts.append(Vector2(x*16 + basex, y*16+basey))
+				colour.append(Color.black)
+				
+		var mesh = MeshInstance2D.new()
+		mesh.name = "mesh_%d" % sector_key
+		mesh.material = mesh_material
+		var pointmesh = MeshInstance2D.new()
+		pointmesh.name = "point_%d" % sector_key
+		colour_data[sector_key] = {
+			"begin_x": sector_x * sector_w,
+			"begin_y": sector_y * sector_h,
+			"meshinst": mesh,
+			"pointinst": pointmesh,
+			"colour": colour,
+			"vertex": verts,
+			"dirty": false,
+		}
+	return colour_data[sector_key]
+
+func set_vertex_colour(x, y, colour):
+	var sector = get_colour_sector(x, y)
+	var local_x = x - sector.begin_x
+	var local_y = y - sector.begin_y
+	sector.colour[sector_index(local_x, local_y)] = colour
+	sector.dirty = true
 	
+func get_vertex_colour(x, y):
+	var sector = get_colour_sector(x, y)
+	var local_x = x - sector.begin_x
+	var local_y = y - sector.begin_y
+	return sector.colour[sector_index(local_x, local_y)]
 
-func _p(x, y):
-	return x + y*tile_w
-
-func build_mesh():
-	var newmesh = Mesh.new()
-	var pointmesh = Mesh.new()
-	var surf_point = SurfaceTool.new()
-	var surf = SurfaceTool.new()
-	surf.begin(Mesh.PRIMITIVE_TRIANGLES)
-	surf_point.begin(Mesh.PRIMITIVE_POINTS)
-	for y in range(0, tile_h - 1):
-		for x in range(0, tile_w - 1):
-			var c1 = colour_data[_p(x, y)]
-			var p1 = Vector3(x, y, 0) * 16
-			var c2 = colour_data[_p(x+1, y)]
-			var p2 = Vector3(x+1, y, 0) * 16
-			var c3 = colour_data[_p(x, y+1)]
-			var p3 = Vector3(x, y+1, 0) * 16
-			var c4 = colour_data[_p(x+1, y+1)]
-			var p4 = Vector3(x+1, y+1, 0) * 16
-			surf.add_color(c1)
-			surf.add_vertex(p1)
-			surf.add_color(c2)
-			surf.add_vertex(p2)
-			surf.add_color(c3)
-			surf.add_vertex(p3)
-			
-			surf.add_color(c2)
-			surf.add_vertex(p2)
-			surf.add_color(c4)
-			surf.add_vertex(p4)
-			surf.add_color(c3)
-			surf.add_vertex(p3)
-			
-			surf_point.add_color(c1)
-			surf_point.add_vertex(p1)
-			
-	surf.commit(newmesh)
-	surf_point.commit(pointmesh)
-	mesh.mesh = newmesh
-	_showpoint.mesh = pointmesh
+func get_mesh_material():
 	var mesh_mat = ShaderMaterial.new()
 	if light_data.get("is_glow") == "True":
 		mesh_mat.shader = light_mat
@@ -115,11 +142,22 @@ func build_mesh():
 		u_shimmer.y = float(light_data["shimmerY"])
 	mesh_mat.set_shader_param("shimmer", u_shimmer)
 	mesh_mat.set_shader_param("intensity", u_intensity)
-	
-	mesh.material = mesh_mat
+	return mesh_mat
+
+func _p(x, y):
+	return x + y*tile_w
+
+func build_mesh(sector):
+	var meshbuilder = ArrayMesh.new()
+	var arrays = []
+	arrays.resize(ArrayMesh.ARRAY_MAX)
+	arrays[ArrayMesh.ARRAY_VERTEX] = PoolVector2Array(sector.vertex)
+	arrays[ArrayMesh.ARRAY_COLOR] = PoolColorArray(sector.colour)
+	arrays[ArrayMesh.ARRAY_INDEX] = sector_index_array
+	meshbuilder.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	sector.meshinst.mesh = meshbuilder
 	
 func add_stroke_point(button, point: Vector2, params):
-		
 	if current_stroke == null:
 		var drawcol
 		if button == BUTTON_LEFT:
@@ -171,12 +209,17 @@ func end_stroke():
 	for key in current_stroke.points.keys():
 		var xy = decode_pair(key)
 		var strength = current_stroke.points[key]
-		var col_idx = _p(xy[0], xy[1])
-		var curcol = colour_data[col_idx] as Color
+		var curcol = get_vertex_colour(xy[0], xy[1]) as Color
 		drawcol.a = strength
-		colour_data[col_idx] = curcol.blend(drawcol)
-	build_mesh()
+		set_vertex_colour(xy[0], xy[1], curcol.blend(drawcol))
 	current_stroke = null
+	update_dirty_sectors()
+
+func update_dirty_sectors():
+	for sector in colour_data.values():
+		if sector.dirty:
+			build_mesh(sector)
+			sector.dirty = false
 
 func encode_pair(x, y):
 	return x*10000 + y
