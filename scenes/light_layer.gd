@@ -7,11 +7,15 @@ var tile_h = 0
 
 const sector_w = 32
 const sector_h = 32
+const apply_stroke_limit = 12
 var mesh_material = null
 var colour_data = {}
 onready var meshgroup = $group_mesh
 onready var pointgroup = $group_point
 onready var bridge_mesh = $inbetween
+
+var stroke_history = []
+var history_location = 0
 
 var light_mat = preload("res://shadermat/shd_light_layer.gdshader") as Shader
 var dark_mat = preload("res://shadermat/shd_shadow_layer.gdshader") as Shader
@@ -234,6 +238,8 @@ func add_stroke_point(button, point: Vector2, params):
 		current_stroke = {
 			"count": 1, 
 			"points": {},
+			"new_points": {},
+			"basis": {},
 			"colour": drawcol,
 		}
 	else:
@@ -260,27 +266,59 @@ func add_stroke_point(button, point: Vector2, params):
 			strength *= params.mix_amount
 			if strength > 0:
 				var encode = encode_pair(tx, ty)
+				if !encode in current_stroke.basis:
+					# add original colour of point
+					current_stroke.basis[encode] = get_vertex_colour(tx, ty)
 				if encode in current_stroke.points:
 					var current = current_stroke.points[encode]
-					current_stroke.points[encode] = min(current + strength, 1)
-				else:
-					current_stroke.points[encode] = strength
+					strength = min(current + strength, 1)
+				current_stroke.points[encode] = strength
+				current_stroke.new_points[encode] = strength
 				
-	if current_stroke.count > 12:
-		end_stroke()
-		
+	if current_stroke.count > apply_stroke_limit:
+		apply_stroke_new(current_stroke)
+		current_stroke.count = 0
+
+# only applies new points in the stroke
+func apply_stroke_new(stroke):
+	var drawcol = stroke.colour
+	for key in stroke.new_points.keys():
+		var xy = decode_pair(key)
+		var strength = stroke.points[key]
+		var curcol = stroke.basis[key] as Color
+		drawcol.a = strength
+		set_vertex_colour(xy[0], xy[1], curcol.blend(drawcol))
+	stroke.new_points = {}
+	update_dirty_sectors()
+	
+# applies every point in the stroke
+func apply_stroke(stroke):
+	var drawcol = stroke.colour
+	for key in stroke.points.keys():
+		var xy = decode_pair(key)
+		var strength = stroke.points[key]
+		var curcol = stroke.basis[key] as Color
+		drawcol.a = strength
+		set_vertex_colour(xy[0], xy[1], curcol.blend(drawcol))
+	update_dirty_sectors()
+
+# set every point in the stroke to basis colour
+func revert_stroke(stroke):
+	for key in stroke.basis.keys():
+		var xy = decode_pair(key)
+		set_vertex_colour(xy[0], xy[1], stroke.basis[key])
+	update_dirty_sectors()
+	
 func end_stroke():
 	if !current_stroke:
 		return
-	var drawcol = current_stroke.colour
-	for key in current_stroke.points.keys():
-		var xy = decode_pair(key)
-		var strength = current_stroke.points[key]
-		var curcol = get_vertex_colour(xy[0], xy[1]) as Color
-		drawcol.a = strength
-		set_vertex_colour(xy[0], xy[1], curcol.blend(drawcol))
+	if current_stroke.count > 0:
+		apply_stroke(current_stroke)
+	if stroke_history.size() > history_location:
+		stroke_history.resize(history_location)
+	stroke_history.append(current_stroke)
+	history_location += 1
 	current_stroke = null
-	update_dirty_sectors()
 
 func update_dirty_sectors():
 	var dirty_bridge = false
@@ -303,3 +341,16 @@ func get_colour(mousepos):
 	var y = clamp(floor(mousepos.y/16), 0, tile_h-1)
 	var col_idx = _p(x, y)
 	return colour_data[col_idx]
+
+func undo():
+	if history_location > 0:
+		history_location -= 1
+		var stroke_to_undo = stroke_history[history_location]
+		revert_stroke(stroke_to_undo)
+		pass
+	
+func redo():
+	if history_location < stroke_history.size():
+		var stroke_to_redo = stroke_history[history_location]
+		apply_stroke(stroke_to_redo)
+		history_location += 1

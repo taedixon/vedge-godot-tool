@@ -135,3 +135,11 @@ func end_stroke():
 func get_picked_colour():
 	if layer_editable():
 		return active_layer.get_colour(get_local_mouse_position())
+		
+func undo():
+	if layer_editable():
+		active_layer.undo()
+
+func redo():
+	if layer_editable():
+		active_layer.redo()

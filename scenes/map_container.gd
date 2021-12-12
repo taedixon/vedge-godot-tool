@@ -78,6 +78,13 @@ func _process(delta):
 				var col = map.get_picked_colour()
 				if col:
 					emit_signal("colour_picked", mb, col)
+	# check for undo/redo
+	if Input.is_action_just_pressed("tool_redo"):
+		map.end_stroke()
+		map.redo()
+	elif Input.is_action_just_pressed("tool_undo"):
+		map.end_stroke()
+		map.undo()
 		
 func on_focus_loss():
 	update()
