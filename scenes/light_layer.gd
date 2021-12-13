@@ -61,13 +61,22 @@ func sector_index(x, y):
 func build_sector_indexes():
 	for y in range(0, sector_h-1):
 		for x in range(0, sector_w-1):
-			sector_index_array.append(sector_index(x, y))
-			sector_index_array.append(sector_index(x+1, y))
-			sector_index_array.append(sector_index(x+1, y+1))
-			
-			sector_index_array.append(sector_index(x, y))
-			sector_index_array.append(sector_index(x+1, y+1))
-			sector_index_array.append(sector_index(x, y+1))
+			if (y % 2) == 1:
+				sector_index_array.append(sector_index(x, y))
+				sector_index_array.append(sector_index(x+1, y))
+				sector_index_array.append(sector_index(x+1, y+1))
+				
+				sector_index_array.append(sector_index(x, y))
+				sector_index_array.append(sector_index(x+1, y+1))
+				sector_index_array.append(sector_index(x, y+1))
+			else:
+				sector_index_array.append(sector_index(x, y))
+				sector_index_array.append(sector_index(x+1, y))
+				sector_index_array.append(sector_index(x, y+1))
+				
+				sector_index_array.append(sector_index(x, y+1))
+				sector_index_array.append(sector_index(x+1, y))
+				sector_index_array.append(sector_index(x+1, y+1))
 
 func build_colors():
 	var tileset_img = GmsAssetCache.get_tileset(layer_data.tilesetId.path).image as Image
@@ -162,8 +171,10 @@ func get_mesh_material():
 		u_shimmer.x = float(detail["shimmerX"])
 	if "shimmerY" in detail:
 		u_shimmer.y = float(detail["shimmerY"])
+	var u_speed = float(detail.get("shimmerSpeed", 1))
 	mesh_mat.set_shader_param("shimmer", u_shimmer)
 	mesh_mat.set_shader_param("intensity", u_intensity)
+	mesh_mat.set_shader_param("timescale", u_speed)
 	return mesh_mat
 
 func _p(x, y):
@@ -225,19 +236,35 @@ func tool_add_quad(meshbuilder: SurfaceTool, topleft: Vector2, c1: Color, c2: Co
 	var p2 = Vector3(topleft.x+16, topleft.y, 0)
 	var p3 = Vector3(topleft.x, topleft.y+16, 0)
 	var p4 = Vector3(topleft.x+16, topleft.y+16, 0)
-	meshbuilder.add_color(c1)
-	meshbuilder.add_vertex(p1)
-	meshbuilder.add_color(c2)
-	meshbuilder.add_vertex(p2)
-	meshbuilder.add_color(c4)
-	meshbuilder.add_vertex(p4)
-	
-	meshbuilder.add_color(c1)
-	meshbuilder.add_vertex(p1)
-	meshbuilder.add_color(c4)
-	meshbuilder.add_vertex(p4)
-	meshbuilder.add_color(c3)
-	meshbuilder.add_vertex(p3)
+	if (int(topleft.y/16) % 2) == 1:
+		meshbuilder.add_color(c1)
+		meshbuilder.add_vertex(p1)
+		meshbuilder.add_color(c2)
+		meshbuilder.add_vertex(p2)
+		meshbuilder.add_color(c4)
+		meshbuilder.add_vertex(p4)
+		
+		meshbuilder.add_color(c1)
+		meshbuilder.add_vertex(p1)
+		meshbuilder.add_color(c4)
+		meshbuilder.add_vertex(p4)
+		meshbuilder.add_color(c3)
+		meshbuilder.add_vertex(p3)
+	else:
+		meshbuilder.add_color(c1)
+		meshbuilder.add_vertex(p1)
+		meshbuilder.add_color(c2)
+		meshbuilder.add_vertex(p2)
+		meshbuilder.add_color(c3)
+		meshbuilder.add_vertex(p3)
+		
+		meshbuilder.add_color(c3)
+		meshbuilder.add_vertex(p3)
+		meshbuilder.add_color(c2)
+		meshbuilder.add_vertex(p2)
+		meshbuilder.add_color(c4)
+		meshbuilder.add_vertex(p4)
+		
 	
 func add_stroke_point(button, point: Vector2, params):
 	if current_stroke == null:

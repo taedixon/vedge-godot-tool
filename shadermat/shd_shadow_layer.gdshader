@@ -3,9 +3,10 @@ render_mode skip_vertex_transform, blend_mul;
 
 uniform vec2 shimmer;
 uniform float intensity;
+uniform float timescale;
 
 void vertex() {
-	vec2 offset = sin(VERTEX.xy + TIME * 5. + distance(VERTEX.xy, vec2(0, 0))) * shimmer;
+	vec2 offset = sin(VERTEX.xy + TIME * 10.0 * timescale + distance(VERTEX.xy, vec2(0, 0))) * shimmer;
 	VERTEX = (EXTRA_MATRIX * (WORLD_MATRIX * vec4(VERTEX + offset, 0.0, 1.0))).xy;
 }
 

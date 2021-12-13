@@ -105,10 +105,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -27.0
-margin_top = -41.6666
-margin_right = 217.0
-margin_bottom = 110.333
+margin_left = -122.0
+margin_top = -76.0
+margin_right = 122.0
+margin_bottom = 136.0
 
 [connection signal="colour_picked" from="map_container" to="light_toolbar" method="on_colour_pick"]
 [connection signal="focus_entered" from="map_container" to="map_container" method="on_focus_gain"]
