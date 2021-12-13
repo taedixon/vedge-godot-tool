@@ -8,6 +8,7 @@ onready var layers_root = $tile_layers
 var scn_light_layer = preload("res://scenes/light_layer.tscn")
 
 var light_layers = {}
+var layer_metadata = {}
 
 var active_layer = null
 
@@ -36,15 +37,16 @@ func populate_map(roomdata):
 	for child in layers_root.get_children():
 		layers_root.remove_child(child)
 	var nodes_to_add = []
-	find_light_layers(roomdata)
+	create_layer_metadata(roomdata)
 	for layer in roomdata.layers:
-		if layer.resourceType == "GMRTileLayer" && layer.tilesetId:
-			if layer.name in light_layers:
-				nodes_to_add.push_front(add_light_layer(layer))
-			else:
+		var meta = layer_metadata[layer.name]
+		match meta.kind:
+			"tile": 
 				nodes_to_add.push_front(add_tile_layer(layer))
-		elif layer.resourceType == "GMRAssetLayer":
-			nodes_to_add.push_front(add_asset_layer(layer))
+			"light": 
+				nodes_to_add.push_front(add_light_layer(layer))
+			"asset": 
+				nodes_to_add.push_front(add_asset_layer(layer))
 	for i in nodes_to_add:
 		layers_root.add_child(i)
 		
@@ -89,16 +91,33 @@ func add_tile_layer(layer):
 	return tmap
 	
 func add_light_layer(layer):
-	var light_data = light_layers[layer.name]
+	var light_data = get_metadata(layer.name).detail
 	var node = scn_light_layer.instance()
 	node.layer_data = layer
-	node.light_data = light_data
+	node.detail = light_data
 	node.name = layer.name
 	node.visible = layer.visible
 	return node
+	
+func create_layer_metadata(roomdata):
+	layer_metadata = {}
+	for layer in roomdata.layers:
+		var meta = {
+			"kind": "unknown",
+			"name": layer.name,
+			"detail": {}
+		}
+		match layer.resourceType:
+			"GMRInstanceLayer":
+				meta.kind = "instance"
+			"GMRAssetLayer": 
+				meta.kind = "asset"
+			"GMRTileLayer":
+				meta.kind = "tile"
+		layer_metadata[layer.name] = meta
+	find_light_layers(roomdata)
 
 func find_light_layers(roomdata):
-	light_layers = {}
 	for layer in roomdata.layers:
 		if layer.resourceType == "GMRInstanceLayer" && layer.instances:
 			for inst in layer.instances:
@@ -108,8 +127,19 @@ func find_light_layers(roomdata):
 						inst_simple[prop.propertyId.name] = prop.value
 					if !("layer_name" in inst_simple):
 						inst_simple.layer_name = "shadow"
-					inst_simple._gmsobj = inst
-					light_layers[inst_simple.layer_name] = inst_simple
+					var meta = layer_metadata[inst_simple.layer_name]
+					meta.detail = inst_simple
+					meta.kind = "light"
+
+func get_metadata(layer):
+	return layer_metadata.get(layer)
+
+func update_metadata(layer, detail):
+	var current = get_metadata(layer)
+	var node = layers_root.get_node(layer)
+	if current && node:
+		current.detail = detail
+		node.detail = detail
 
 func _draw():
 	draw_rect(bounds, Color.cyan, false)
@@ -119,10 +149,9 @@ func layer_editable():
 	
 func set_active_layer(layer):
 	active_layer = null
-	for node in layers_root.get_children():
-		if node.name == layer && node.name in light_layers:
-			active_layer = node
-			break;
+	var meta = get_metadata(layer)
+	if meta && meta.kind == "light":
+		active_layer = layers_root.get_node(layer)
 	
 func add_stroke_point(mb, params):
 	if layer_editable():

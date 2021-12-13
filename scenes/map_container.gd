@@ -117,3 +117,4 @@ func on_mouse_exit():
 
 func on_mouse_enter():
 	grab_focus()
+

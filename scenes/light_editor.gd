@@ -7,6 +7,7 @@ onready var mapcontainer = $map_container
 onready var roomlist = $Panel/TabContainer/Rooms/room_list
 onready var layerlist = $Panel/TabContainer/Layers/layer_items
 onready var roomfilter = $Panel/TabContainer/Rooms/room_filter
+onready var dialog_lightlayer = $dialog_light_layer_detail
 
 var scn_layer_item = preload("res://ui/layer_list_item.tscn")
 var style_panel_select = preload("res://style/style_panel_selected.tres")
@@ -49,11 +50,13 @@ func set_layer_list(room_path):
 		var layer_type = layer.resourceType
 		if layer_type == "GMRTileLayer" || layer_type == "GMRAssetLayer":
 			var listitem = scn_layer_item.instance()
+			var meta = map.get_metadata(layer.name)
 			listitem.layer_name = layer.name
 			listitem.layer_visible = layer.visible
 			listitem.connect("visible_toggled", map, "layer_toggle_visible")
 			listitem.connect("layer_selected", self, "on_layer_select")
-			listitem.selectable = layer.name in map.light_layers
+			listitem.connect("layer_edit_detail", self, "on_layer_edit_detail")
+			listitem.selectable = meta && meta.kind == "light"
 			layerlist.add_child(listitem)
 
 func on_layer_select(layer):
@@ -63,3 +66,14 @@ func on_layer_select(layer):
 		else:
 			child.add_stylebox_override("panel", null)
 	map.set_active_layer(layer)
+	
+func on_layer_edit_detail(layer):
+	var meta = map.get_metadata(layer)
+	if meta && meta.kind == "light":
+		dialog_lightlayer.layer_name = meta.name
+		dialog_lightlayer.data = meta.detail
+		dialog_lightlayer.popup_centered()
+
+func on_layer_detail_changed(layer, detail):
+	map.update_metadata(layer, detail)
+	

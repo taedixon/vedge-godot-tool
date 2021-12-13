@@ -1,7 +1,7 @@
 extends Node2D
 
 var layer_data = null
-var light_data = null
+var detail = null setget set_detail
 var tile_w = 0
 var tile_h = 0
 
@@ -30,11 +30,12 @@ const gaussian_55 = [
 var sector_index_array = PoolIntArray()
 
 var current_stroke = null
+var initialized = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	build_sector_indexes()
-	if layer_data && light_data:
+	if layer_data && detail:
 		mesh_material = get_mesh_material()
 		colour_data = {}
 		build_colors()
@@ -43,6 +44,16 @@ func _ready():
 			meshgroup.add_child(sector.meshinst)
 			pointgroup.add_child(sector.pointinst)
 			create_bridge_mesh()
+		initialized = true
+
+func set_detail(new_detail):
+	detail = new_detail
+	if initialized:
+		mesh_material = get_mesh_material()
+		for child in meshgroup.get_children():
+			child.material = mesh_material
+		bridge_mesh.material = mesh_material
+	
 		
 func sector_index(x, y):
 	return x + y * sector_w
@@ -139,18 +150,18 @@ func get_vertex_colour(x, y):
 
 func get_mesh_material():
 	var mesh_mat = ShaderMaterial.new()
-	if light_data.get("is_glow") == "True":
+	if detail.get("is_glow") == "True":
 		mesh_mat.shader = light_mat
 	else:
 		mesh_mat.shader = dark_mat
 	var u_shimmer = Vector2(1, 1)
 	var u_intensity = 1
-	if "intensity" in light_data:
-		u_intensity = float(light_data["intensity"])
-	if "shimmerX" in light_data:
-		u_shimmer.x = float(light_data["shimmerX"])
-	if "shimmerY" in light_data:
-		u_shimmer.y = float(light_data["shimmerY"])
+	if "intensity" in detail:
+		u_intensity = float(detail["intensity"])
+	if "shimmerX" in detail:
+		u_shimmer.x = float(detail["shimmerX"])
+	if "shimmerY" in detail:
+		u_shimmer.y = float(detail["shimmerY"])
 	mesh_mat.set_shader_param("shimmer", u_shimmer)
 	mesh_mat.set_shader_param("intensity", u_intensity)
 	return mesh_mat

@@ -2,6 +2,7 @@ extends PanelContainer
 
 signal visible_toggled(layer, visible)
 signal layer_selected(layer)
+signal layer_edit_detail(layer)
 
 export (bool) var layer_visible = true setget set_layer_visible
 export (String) var layer_name = "Layer Name"
@@ -11,7 +12,8 @@ var ic_hidden = preload("res://img/icon/GuiVisibilityHidden.svg")
 var ic_visible = preload("res://img/icon/GuiVisibilityVisible.svg")
 
 onready var label = $HBoxContainer/Label
-onready var button = $HBoxContainer/Button
+onready var button = $HBoxContainer/btn_vis
+onready var btn_edit = $HBoxContainer/btn_edit
 
 func _ready():
 	label.text = layer_name
@@ -19,6 +21,7 @@ func _ready():
 	button.pressed = !layer_visible
 	if selectable:
 		mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		btn_edit.visible = true
 
 func set_layer_visible(vis):
 	layer_visible = vis
@@ -32,6 +35,9 @@ func on_button_press(press):
 	layer_visible = vis
 	emit_signal("visible_toggled", layer_name, vis)
 
+func on_edit_button_press():
+	emit_signal("layer_edit_detail", layer_name)
+
 func set_button_icon(vis):
 	if vis:
 		button.icon = ic_visible
@@ -40,5 +46,5 @@ func set_button_icon(vis):
 
 func on_input_event(event: InputEvent):
 	if event is InputEventMouseButton:
-		if event.pressed && event.button_index == BUTTON_LEFT:
+		if event.pressed && event.button_index == BUTTON_LEFT && selectable:
 			emit_signal("layer_selected", layer_name)
