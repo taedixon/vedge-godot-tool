@@ -38,7 +38,6 @@ func populate_tileset(tdata):
 	var sprite_data = _load_yy(root_path + tdata.spriteId.path)
 	var sprite_folder = tdata.spriteId.path.get_base_dir() + "/"
 	var sprite_path = root_path + sprite_folder + sprite_data.frames[0].compositeImage.FrameId.name + ".png"
-	print(sprite_path)
 	img.load(sprite_path)
 	var tex = ImageTexture.new()
 	tex.create_from_image(img)
@@ -71,7 +70,6 @@ func populate_sprite(yydata):
 	var frame = yydata.frames[0].compositeImage
 	var sprite_folder = frame.FrameId.path.get_base_dir() + "/"
 	var sprite_path = root_path + sprite_folder + frame.FrameId.name + ".png"
-	print(sprite_path)
 	var img = Image.new()
 	img.load(sprite_path)
 	var tex = ImageTexture.new()

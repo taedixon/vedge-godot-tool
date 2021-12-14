@@ -2,13 +2,13 @@ extends Node2D
 
 
 # Declare member variables here. Examples:
-var _roomdata = null
 export (String) var room_path setget set_room_path
 onready var layers_root = $tile_layers
 var scn_light_layer = preload("res://scenes/light_layer.tscn")
 
 var light_layers = {}
 var layer_metadata = {}
+var room_name = ""
 
 var active_layer = null
 
@@ -20,10 +20,10 @@ func _ready():
 func set_room_path(p):
 	room_path = p
 	if typeof(room_path) == TYPE_STRING && room_path.length() > 0 && layers_root:
-		_roomdata = load_room_data(room_path)
+		load_room_data(room_path)
 
 func load_room_data(path):
-	_roomdata = GmsAssetCache.get_room(path)
+	var _roomdata = GmsAssetCache.get_room(path)
 	active_layer = null
 	if _roomdata:
 		populate_map(_roomdata)
@@ -34,6 +34,8 @@ func layer_toggle_visible(layer, vis):
 			child.visible = vis
 			
 func populate_map(roomdata):
+	bounds.size = Vector2(roomdata.roomSettings.Width,roomdata.roomSettings.Height)
+	room_name = roomdata.name
 	for child in layers_root.get_children():
 		layers_root.remove_child(child)
 	var nodes_to_add = []
@@ -50,9 +52,9 @@ func populate_map(roomdata):
 	for i in nodes_to_add:
 		layers_root.add_child(i)
 		
-	bounds.size = Vector2(roomdata.roomSettings.Width,roomdata.roomSettings.Height)
 	position = -bounds.size / 2
 	update()
+	
 		
 func add_asset_layer(layer):
 	var base = Node2D.new()
@@ -93,10 +95,17 @@ func add_tile_layer(layer):
 func add_light_layer(layer):
 	var light_data = get_metadata(layer.name).detail
 	var node = scn_light_layer.instance()
-	node.layer_data = layer
+	var bufferpath = get_lightbuffer_path(layer.name)
+	var dir = Directory.new()
+	node.tile_w = ceil(bounds.size.x/16.0)
+	node.tile_h = ceil(bounds.size.y/16.0)
+	if dir.file_exists(bufferpath):
+		node.layer_data = bufferpath
+	else:
+		node.layer_data = layer
 	node.detail = light_data
 	node.name = layer.name
-	node.visible = layer.visible
+	node.visible = true
 	return node
 	
 func create_layer_metadata(roomdata):
@@ -128,8 +137,43 @@ func find_light_layers(roomdata):
 					if !("layer_name" in inst_simple):
 						inst_simple.layer_name = "shadow"
 					var meta = layer_metadata[inst_simple.layer_name]
+					inst_simple.vertex_count = 0
+					inst_simple.version = "vtf_lightmap_1"
+					inst_simple.build = "dev_nov2021" 
 					meta.detail = inst_simple
 					meta.kind = "light"
+					
+func get_lightbuffer_path(layer_name):
+	var filename = room_name + "_" + layer_name
+	return GmsAssetCache.root_path + "datafiles/lightmaps/" + filename
+					
+func save():
+	for layer in layer_metadata.values():
+		var node = layers_root.get_node_or_null(layer.name)
+		if node && node.has_method("save"):
+			var filename = room_name + "_" + layer.name
+			var binfile = File.new()
+			var fullpath = get_lightbuffer_path(layer.name)
+			var e = binfile.open(fullpath, File.WRITE)
+			if e != OK:
+				push_error("Failed to open %s for writing" % fullpath)
+				continue
+			node.save(binfile)
+			binfile.close()
+			
+			var dir = Directory.new()
+			var copydest = OS.get_user_data_dir() + "/../../../../Local/VernalEdge/lightmaps/"
+			dir.copy(fullpath, copydest + filename)
+			
+			var metafile = File.new()
+			e = metafile.open(fullpath + ".meta", File.WRITE)
+			if e != OK:
+				push_error("Failed to open %s.meta for writing" % fullpath)
+				continue
+			metafile.store_string(JSON.print(layer.detail))
+			metafile.close()
+			dir.copy(fullpath + ".meta", copydest + filename + ".meta")
+			
 
 func get_metadata(layer):
 	return layer_metadata.get(layer)

@@ -62,7 +62,6 @@ __meta__ = {
 [node name="room_filter" type="LineEdit" parent="Panel/TabContainer/Rooms"]
 margin_right = 244.0
 margin_bottom = 24.0
-text = "star"
 placeholder_text = "Filter"
 __meta__ = {
 "_edit_lock_": true

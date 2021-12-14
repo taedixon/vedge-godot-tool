@@ -57,6 +57,8 @@ func set_layer_list(room_path):
 			listitem.connect("layer_selected", self, "on_layer_select")
 			listitem.connect("layer_edit_detail", self, "on_layer_edit_detail")
 			listitem.selectable = meta && meta.kind == "light"
+			if listitem.selectable:
+				listitem.layer_visible = true
 			layerlist.add_child(listitem)
 
 func on_layer_select(layer):
@@ -77,3 +79,5 @@ func on_layer_edit_detail(layer):
 func on_layer_detail_changed(layer, detail):
 	map.update_metadata(layer, detail)
 	
+func save():
+	map.save()

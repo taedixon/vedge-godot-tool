@@ -49,7 +49,7 @@ margin_bottom = 20.0
 margin_right = 35.0
 margin_bottom = 20.0
 text = "File"
-items = [ "Open Project", null, 0, false, false, 0, 0, null, "", false, "Save Project", null, 0, false, false, 1, 0, null, "", false ]
+items = [ "<Reserved>", null, 0, false, false, 0, 0, null, "", false, "Save Project", null, 0, false, false, 1, 0, null, "", false ]
 switch_on_hover = true
 
 [node name="menu_tool" type="MenuButton" parent="menu_bar/MarginContainer/HBoxContainer"]

@@ -1,6 +1,6 @@
 extends Node2D
 
-var layer_data = null
+var layer_data
 var detail = null setget set_detail
 var tile_w = 0
 var tile_h = 0
@@ -13,6 +13,7 @@ var colour_data = {}
 onready var meshgroup = $group_mesh
 onready var pointgroup = $group_point
 onready var bridge_mesh = $inbetween
+var fill_colour = Color.white
 
 var stroke_history = []
 var history_location = 0
@@ -36,9 +37,12 @@ var initialized = false
 func _ready():
 	build_sector_indexes()
 	if layer_data && detail:
-		mesh_material = get_mesh_material()
 		colour_data = {}
-		build_colors()
+		mesh_material = get_mesh_material()
+		if layer_data is String:
+			load_colours_from_file(layer_data)
+		else:
+			build_colors(layer_data)
 		for sector in colour_data.values():
 			build_mesh(sector)
 			meshgroup.add_child(sector.meshinst)
@@ -53,8 +57,39 @@ func set_detail(new_detail):
 		for child in meshgroup.get_children():
 			child.material = mesh_material
 		bridge_mesh.material = mesh_material
+
+func save(f: File):
+	detail.vertex_count = 0
+	for y in range(0, tile_h-1):
+		for x in range(0, tile_w-1):
+			try_save_quad(x, y, f)
+			
+func try_save_quad(x, y, f: File):
+	var c1 = get_vertex_colour(x, y)
+	var c2 = get_vertex_colour(x+1, y)
+	var c3 = get_vertex_colour(x, y+1)
+	var c4 = get_vertex_colour(x+1, y+1)
+	var p1 = {"x": x, "y": y, "c": c1}
+	var p2 = {"x": x+1, "y": y, "c": c2}
+	var p3 = {"x": x, "y": y+1, "c": c3}
+	var p4 = {"x": x+1, "y": y+1, "c": c4}
+	if (y % 2) == 1:
+		try_save_tri(f, p1, p2, p4)
+		try_save_tri(f, p1, p4, p3)
+	else:
+		try_save_tri(f, p1, p2, p3)
+		try_save_tri(f, p3, p2, p4)
 	
-		
+func try_save_tri(f: File, p1, p2, p3):
+	var base_col = Color.black if detail.get("is_glow") == "True" else Color.white
+	if base_col.is_equal_approx(p1.c) && base_col.is_equal_approx(p2.c) && base_col.is_equal_approx(p3.c):
+		return
+	for p in [p1, p2, p3]:
+		f.store_float(p.x*16)
+		f.store_float(p.y*16)
+		f.store_32(p.c.to_abgr32())
+		detail.vertex_count += 1
+
 func sector_index(x, y):
 	return x + y * sector_w
 
@@ -78,14 +113,12 @@ func build_sector_indexes():
 				sector_index_array.append(sector_index(x+1, y))
 				sector_index_array.append(sector_index(x+1, y+1))
 
-func build_colors():
-	var tileset_img = GmsAssetCache.get_tileset(layer_data.tilesetId.path).image as Image
+func build_colors(layer):
+	var tileset_img = GmsAssetCache.get_tileset(layer.tilesetId.path).image as Image
 	tileset_img.lock()
 	var tileset_w = tileset_img.get_width() / 16
-	tile_w = layer_data.tiles.SerialiseWidth
-	tile_h = layer_data.tiles.SerialiseHeight
 	var raw_color = []
-	for tid in layer_data.tiles.TileSerialiseData:
+	for tid in layer.tiles.TileSerialiseData:
 		var itid = int(tid)
 		var tid_real = itid & 0x7FFFF
 		var tileset_x = (tid_real % tileset_w) * 16 + 8
@@ -121,7 +154,7 @@ func get_colour_sector(x, y):
 		for y in range(0, sector_h):
 			for x in range(0, sector_w):
 				verts.append(Vector2(x*16 + basex, y*16+basey))
-				colour.append(Color.black)
+				colour.append(fill_colour)
 				
 		var mesh = MeshInstance2D.new()
 		mesh.name = "mesh_%d" % sector_key
@@ -392,3 +425,32 @@ func redo():
 		var stroke_to_redo = stroke_history[history_location]
 		apply_stroke(stroke_to_redo)
 		history_location += 1
+		
+func load_colours_from_file(vertex_path):
+	var meta = File.new()
+	var e = meta.open(vertex_path + ".meta", File.READ)
+	if e != OK:
+		push_error("Failed to open meta file for " + vertex_path)
+		return
+	var meta_raw = meta.get_as_text()
+	meta.close()
+	var parsed = JSON.parse(meta_raw)
+	if parsed.error != OK:
+		push_error("Failed to parse meta file for " + vertex_path)
+		return
+	detail = parsed.result
+	fill_colour = Color.black if detail.get("is_glow") == "True" else Color.white
+	mesh_material = get_mesh_material()
+		
+	var f = File.new()
+	e = f.open(vertex_path, File.READ)
+	if e != OK:
+		push_error("Failed to open vertex file " + vertex_path)
+		return
+	
+	while !f.eof_reached():
+		var x = floor(f.get_float() / 16)
+		var y = floor(f.get_float() / 16)
+		var c_raw = f.get_32()
+		var c = Color8((c_raw ) & 0xFF, (c_raw >> 8 & 0xFF), (c_raw >> 16) & 0xFF)
+		set_vertex_colour(x, y, c)

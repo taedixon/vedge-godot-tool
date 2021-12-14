@@ -13,9 +13,21 @@ _global_script_classes=[ {
 "class": "GrassSprite",
 "language": "GDScript",
 "path": "res://grass_asset.gd"
+}, {
+"base": "Control",
+"class": "Toast",
+"language": "GDScript",
+"path": "res://addons/toast/toast_script.gd"
+}, {
+"base": "Resource",
+"class": "ToastStyle",
+"language": "GDScript",
+"path": "res://addons/toast/style_resource/toast_style.gd"
 } ]
 _global_script_class_icons={
-"GrassSprite": ""
+"GrassSprite": "",
+"Toast": "",
+"ToastStyle": ""
 }
 
 [application]
@@ -28,6 +40,10 @@ config/icon="res://icon.png"
 
 GmsAssetCache="*res://util/GmsAssetCache.gd"
 Config="*res://util/Config.gd"
+
+[editor_plugins]
+
+enabled=PoolStringArray( "res://addons/toast/plugin.cfg" )
 
 [global]
 
@@ -110,5 +126,4 @@ quality/driver/driver_name="GLES2"
 2d/snapping/use_gpu_pixel_snap=true
 vram_compression/import_etc=true
 vram_compression/import_etc2=false
-quality/filters/use_debanding=true
 environment/default_environment="res://default_env.tres"
