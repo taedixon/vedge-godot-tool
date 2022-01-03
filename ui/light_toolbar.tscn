@@ -43,13 +43,13 @@ text = "BRUSH SIZE"
 
 [node name="label_falloff" type="Label" parent="GridContainer"]
 margin_left = 281.0
-margin_right = 356.0
+margin_right = 362.0
 margin_bottom = 14.0
 text = "FALLOFF"
 
 [node name="label_mix" type="Label" parent="GridContainer"]
-margin_left = 376.0
-margin_right = 471.0
+margin_left = 382.0
+margin_right = 477.0
 margin_bottom = 14.0
 text = "MIX STRENGTH"
 
@@ -58,7 +58,7 @@ margin_top = 18.0
 margin_right = 69.0
 margin_bottom = 42.0
 text = "DRAW"
-items = [ "DRAW", null, false, 0, null, "PICK", null, false, 1, null ]
+items = [ "DRAW", null, false, 0, null, "RECT", null, false, 1, null ]
 selected = 0
 
 [node name="col_lmb" type="ColorPickerButton" parent="GridContainer"]
@@ -90,16 +90,16 @@ value = 32.0
 [node name="falloff_select" type="OptionButton" parent="GridContainer"]
 margin_left = 281.0
 margin_top = 18.0
-margin_right = 356.0
+margin_right = 362.0
 margin_bottom = 42.0
-text = "LINEAR"
+text = "SQUARE"
 items = [ "CONST", null, false, 0, null, "LINEAR", null, false, 1, null, "SQUARE", null, false, 2, null ]
-selected = 1
+selected = 2
 
 [node name="mix_strength" type="HSlider" parent="GridContainer"]
-margin_left = 376.0
+margin_left = 382.0
 margin_top = 18.0
-margin_right = 471.0
+margin_right = 477.0
 margin_bottom = 34.0
 min_value = 0.01
 max_value = 1.0

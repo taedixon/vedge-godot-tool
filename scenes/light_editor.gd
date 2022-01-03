@@ -25,6 +25,10 @@ func on_project_change():
 	set_room_list()
 
 func on_room_select(idx):
+	map.save()
+	var toast = Toast.new("Room Saved", Toast.LENGTH_LONG)
+	get_node("/root").add_child(toast)
+	toast.show()
 	var room_path = roomlist_content[idx].path
 	map.room_path = room_path
 	set_layer_list(room_path)

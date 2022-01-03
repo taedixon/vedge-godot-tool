@@ -14,7 +14,7 @@ var data = {
 	"shimmerY": 0,
 	"intensity": 1,
 	"shimmerSpeed": 1,
-	"is_glow": "True"
+	"is_glow": true
 } setget set_data
 
 func set_layername(name):
@@ -26,7 +26,7 @@ func set_data(in_data):
 	i_shimmerx.value = float(data["shimmerX"])
 	i_shimmery.value = float(data["shimmerY"])
 	i_intensity.value = float(data["intensity"])
-	i_glow.pressed = "is_glow" in data && data["is_glow"] == "True"
+	i_glow.pressed = data.get("is_glow", false)
 	i_shimmerspd = float(data.get("shimmerSpeed", 1))
 
 func on_shimmerx_change(val):
@@ -46,5 +46,5 @@ func on_shimmerspeed_change(val):
 	emit_signal("detail_changed", layer_name, data)
 
 func on_glow_change(val):
-	data["is_glow"] = "True" if val else "False"
+	data["is_glow"] = val
 	emit_signal("detail_changed", layer_name, data)

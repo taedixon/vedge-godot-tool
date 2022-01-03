@@ -102,7 +102,7 @@ func add_light_layer(layer):
 	if dir.file_exists(bufferpath):
 		node.layer_data = bufferpath
 	else:
-		node.layer_data = layer
+		node.layer_data = null
 	node.detail = light_data
 	node.name = layer.name
 	node.visible = true
@@ -136,6 +136,13 @@ func find_light_layers(roomdata):
 						inst_simple[prop.propertyId.name] = prop.value
 					if !("layer_name" in inst_simple):
 						inst_simple.layer_name = "shadow"
+					if !("shimmerX" in inst_simple):
+						inst_simple.shimmerX = 0
+					if !("shimmerY" in inst_simple):
+						inst_simple.shimmerY = 0
+					if !("shimmerSpeed" in inst_simple):
+						inst_simple.shimmerSpeed = 1
+					inst_simple.is_glow = inst_simple.get("is_glow") == "True"
 					var meta = layer_metadata[inst_simple.layer_name]
 					inst_simple.vertex_count = 0
 					inst_simple.version = "vtf_lightmap_1"
@@ -170,7 +177,7 @@ func save():
 			if e != OK:
 				push_error("Failed to open %s.meta for writing" % fullpath)
 				continue
-			metafile.store_string(JSON.print(layer.detail))
+			metafile.store_string(JSON.print(node.detail))
 			metafile.close()
 			dir.copy(fullpath + ".meta", copydest + filename + ".meta")
 			
@@ -200,6 +207,11 @@ func set_active_layer(layer):
 func add_stroke_point(mb, params):
 	if layer_editable():
 		active_layer.add_stroke_point(mb, get_local_mouse_position(), params)
+
+func add_stroke_rect(mb, rec: Rect2, params):
+	if layer_editable():
+		var rec_local = Rect2((rec.position - position)/scale, rec.size / scale)
+		active_layer.add_stroke_rect(mb, rec_local, params)
 
 func end_stroke():
 	if layer_editable():

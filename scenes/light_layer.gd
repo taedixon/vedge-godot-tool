@@ -14,6 +14,7 @@ onready var meshgroup = $group_mesh
 onready var pointgroup = $group_point
 onready var bridge_mesh = $inbetween
 var fill_colour = Color.white
+var out_alpha = 1
 
 var stroke_history = []
 var history_location = 0
@@ -36,18 +37,14 @@ var initialized = false
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	build_sector_indexes()
-	if layer_data && detail:
+	if detail:
 		colour_data = {}
 		mesh_material = get_mesh_material()
-		if layer_data is String:
+		if layer_data:
 			load_colours_from_file(layer_data)
-		else:
-			build_colors(layer_data)
 		for sector in colour_data.values():
 			build_mesh(sector)
-			meshgroup.add_child(sector.meshinst)
-			pointgroup.add_child(sector.pointinst)
-			create_bridge_mesh()
+		create_bridge_mesh()
 		initialized = true
 
 func set_detail(new_detail):
@@ -63,7 +60,8 @@ func save(f: File):
 	for y in range(0, tile_h-1):
 		for x in range(0, tile_w-1):
 			try_save_quad(x, y, f)
-			
+	print(detail.vertex_count)
+	
 func try_save_quad(x, y, f: File):
 	var c1 = get_vertex_colour(x, y)
 	var c2 = get_vertex_colour(x+1, y)
@@ -81,10 +79,11 @@ func try_save_quad(x, y, f: File):
 		try_save_tri(f, p3, p2, p4)
 	
 func try_save_tri(f: File, p1, p2, p3):
-	var base_col = Color.black if detail.get("is_glow") == "True" else Color.white
+	var base_col = Color.black if detail.get("is_glow") else Color.white
 	if base_col.is_equal_approx(p1.c) && base_col.is_equal_approx(p2.c) && base_col.is_equal_approx(p3.c):
 		return
 	for p in [p1, p2, p3]:
+		p.c.a = out_alpha
 		f.store_float(p.x*16)
 		f.store_float(p.y*16)
 		f.store_32(p.c.to_abgr32())
@@ -159,8 +158,10 @@ func get_colour_sector(x, y):
 		var mesh = MeshInstance2D.new()
 		mesh.name = "mesh_%d" % sector_key
 		mesh.material = mesh_material
+		meshgroup.add_child(mesh)
 		var pointmesh = MeshInstance2D.new()
 		pointmesh.name = "point_%d" % sector_key
+		pointgroup.add_child(pointmesh)
 		colour_data[sector_key] = {
 			"begin_x": sector_x * sector_w,
 			"begin_y": sector_y * sector_h,
@@ -170,9 +171,15 @@ func get_colour_sector(x, y):
 			"vertex": verts,
 			"dirty": false,
 			"dirty_bridge": false,
-			"bridge_right": false,
-			"bridge_down": false,
+			"bridge_right": encode_pair(sector_x+1, sector_y) in colour_data,
+			"bridge_down": encode_pair(sector_x, sector_y+1) in colour_data,
 		}
+		var sec_left = colour_data.get(encode_pair(sector_x-1, sector_y))
+		if sec_left:
+			sec_left.bridge_right = true
+		var sec_up = colour_data.get(encode_pair(sector_x, sector_y-1))
+		if sec_up:
+			sec_up.bridge_down = true
 	return colour_data[sector_key]
 
 func set_vertex_colour(x, y, colour):
@@ -192,10 +199,12 @@ func get_vertex_colour(x, y):
 
 func get_mesh_material():
 	var mesh_mat = ShaderMaterial.new()
-	if detail.get("is_glow") == "True":
+	if detail.get("is_glow"):
 		mesh_mat.shader = light_mat
+		fill_colour = Color.black
 	else:
 		mesh_mat.shader = dark_mat
+		fill_colour = Color.white
 	var u_shimmer = Vector2(1, 1)
 	var u_intensity = 1
 	if "intensity" in detail:
@@ -207,6 +216,7 @@ func get_mesh_material():
 	var u_speed = float(detail.get("shimmerSpeed", 1))
 	mesh_mat.set_shader_param("shimmer", u_shimmer)
 	mesh_mat.set_shader_param("intensity", u_intensity)
+	out_alpha = u_intensity
 	mesh_mat.set_shader_param("timescale", u_speed)
 	return mesh_mat
 
@@ -336,19 +346,56 @@ func add_stroke_point(button, point: Vector2, params):
 			strength = pow(max(0, 1.0 - (point.distance_to(tilecoord)/params.radius)), exponent)
 			strength *= params.mix_amount
 			if strength > 0:
-				var encode = encode_pair(tx, ty)
-				if !encode in current_stroke.basis:
-					# add original colour of point
-					current_stroke.basis[encode] = get_vertex_colour(tx, ty)
-				if encode in current_stroke.points:
-					var current = current_stroke.points[encode]
-					strength = min(current + strength, 1)
-				current_stroke.points[encode] = strength
-				current_stroke.new_points[encode] = strength
+				stroke_add_point(tx, ty, strength)
 				
 	if current_stroke.count > apply_stroke_limit:
 		apply_stroke_new(current_stroke)
 		current_stroke.count = 0
+		
+func add_stroke_rect(button, r: Rect2, params):
+	var drawcol
+	if button == BUTTON_LEFT:
+		drawcol = params.col_lmb
+	else:
+		drawcol = params.col_rmb
+	current_stroke = {
+		"count": 1, 
+		"points": {},
+		"new_points": {},
+		"basis": {},
+		"colour": drawcol,
+	}
+	var p1 = r.position
+	var p2 = r.position + r.size
+	if r.size.x < 0:
+		var tmp = p1.x
+		p1.x = p2.x
+		p2.x = tmp
+	if r.size.y < 0:
+		var tmp = p1.y
+		p1.y = p2.y
+		p2.y = tmp
+		
+	var xmin = max(0, ceil(p1.x/16.0))
+	var xmax = min(tile_w - 1, floor(p2.x/16.0))
+	var ymin = max(0, ceil(p1.y /16.0))
+	var ymax = min(tile_h - 1, floor(p2.y/16.0))
+	for tx in range(xmin, xmax+1):
+		for ty in range(ymin, ymax+1):
+			stroke_add_point(tx, ty, params.mix_amount)
+			
+	end_stroke()
+
+func stroke_add_point(tx, ty, strength):
+	var encode = encode_pair(tx, ty)
+	if !encode in current_stroke.basis:
+		# add original colour of point
+		current_stroke.basis[encode] = get_vertex_colour(tx, ty)
+	if encode in current_stroke.points:
+		var current = current_stroke.points[encode]
+		strength = min(current + strength, 1)
+	current_stroke.points[encode] = strength
+	current_stroke.new_points[encode] = strength
 
 # only applies new points in the stroke
 func apply_stroke_new(stroke):
@@ -410,8 +457,7 @@ func decode_pair(n):
 func get_colour(mousepos):
 	var x = clamp(floor(mousepos.x/16), 0, tile_w-1)
 	var y = clamp(floor(mousepos.y/16), 0, tile_h-1)
-	var col_idx = _p(x, y)
-	return colour_data[col_idx]
+	return get_vertex_colour(x, y)
 
 func undo():
 	if history_location > 0:
@@ -439,7 +485,6 @@ func load_colours_from_file(vertex_path):
 		push_error("Failed to parse meta file for " + vertex_path)
 		return
 	detail = parsed.result
-	fill_colour = Color.black if detail.get("is_glow") == "True" else Color.white
 	mesh_material = get_mesh_material()
 		
 	var f = File.new()

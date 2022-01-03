@@ -5,7 +5,6 @@ signal project_changed()
 # Declare member variables here. Examples:
 var saved_tilesets = {}
 var saved_sprites = {}
-var saved_rooms = {}
 var project = null
 var root_path = ""
 
@@ -87,9 +86,7 @@ func get_room_list():
 	return list
 	
 func get_room(path):
-	if !(path in saved_rooms):
-		saved_rooms[path] = _load_yy(root_path + path)
-	return saved_rooms[path]
+	return _load_yy(root_path + path)
 	
 func _load_yy(path):
 	var f = File.new()
