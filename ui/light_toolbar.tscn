@@ -58,7 +58,7 @@ margin_top = 18.0
 margin_right = 69.0
 margin_bottom = 42.0
 text = "DRAW"
-items = [ "DRAW", null, false, 0, null, "RECT", null, false, 1, null ]
+items = [ "DRAW", null, false, 0, null, "RECT", null, false, 1, null, "BLUR", null, false, 2, null, "FILL", null, false, 3, null ]
 selected = 0
 
 [node name="col_lmb" type="ColorPickerButton" parent="GridContainer"]

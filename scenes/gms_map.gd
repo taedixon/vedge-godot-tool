@@ -213,6 +213,10 @@ func add_stroke_rect(mb, rec: Rect2, params):
 		var rec_local = Rect2((rec.position - position)/scale, rec.size / scale)
 		active_layer.add_stroke_rect(mb, rec_local, params)
 
+func add_stroke_fill(mb, params):
+	if layer_editable():
+		active_layer.add_stroke_rect(mb, bounds, params)
+
 func end_stroke():
 	if layer_editable():
 		active_layer.end_stroke()

@@ -117,28 +117,34 @@ func build_colors(layer):
 	tileset_img.lock()
 	var tileset_w = tileset_img.get_width() / 16
 	var raw_color = []
+	var tx = 0
+	var ty = 0
 	for tid in layer.tiles.TileSerialiseData:
 		var itid = int(tid)
 		var tid_real = itid & 0x7FFFF
 		var tileset_x = (tid_real % tileset_w) * 16 + 8
 		var tileset_y = floor(tid_real / tileset_w) * 16 + 8
 		var col = tileset_img.get_pixel(tileset_x, tileset_y)
-		raw_color.append(col)
+		set_vertex_colour(tx, ty, col)
 	tileset_img.unlock()
 	blend_color(raw_color)
+	
+func get_blended_color(tx, ty):
+	var aggregate = Color()
+	for ix in range(-2, 3):
+		for iy in range(-2, 3):
+			var gaussian_fac = gaussian_55[(ix+2) + (iy+2)*5]
+			var sample_x = clamp(tx + ix, 0, tile_w-1)
+			var sample_y = clamp(ty + iy, 0, tile_h-1)
+			var rawval = get_vertex_colour(sample_x, sample_y)
+			aggregate += rawval * gaussian_fac
+	aggregate.a = 1
+	return aggregate
 
 func blend_color(raw_color):
 	for ty in tile_h:
 		for tx in tile_w:
-			var aggregate = Color()
-			for ix in range(-2, 3):
-				for iy in range(-2, 3):
-					var gaussian_fac = gaussian_55[(ix+2) + (iy+2)*5]
-					var sample_x = clamp(tx + ix, 0, tile_w-1)
-					var sample_y = clamp(ty + iy, 0, tile_h-1)
-					var rawval = raw_color[_p(sample_x, sample_y)] as Color
-					aggregate += rawval * gaussian_fac
-			aggregate.a = 1
+			var aggregate = get_blended_color(tx,ty)
 			set_vertex_colour(tx, ty, aggregate)
 
 func get_colour_sector(x, y):
@@ -365,6 +371,10 @@ func add_stroke_rect(button, r: Rect2, params):
 		"basis": {},
 		"colour": drawcol,
 	}
+	var use_blur = false
+	if params.tool == "BLUR":
+		current_stroke.fullcolor_points = true
+		use_blur = true 
 	var p1 = r.position
 	var p2 = r.position + r.size
 	if r.size.x < 0:
@@ -382,8 +392,10 @@ func add_stroke_rect(button, r: Rect2, params):
 	var ymax = min(tile_h - 1, floor(p2.y/16.0))
 	for tx in range(xmin, xmax+1):
 		for ty in range(ymin, ymax+1):
-			stroke_add_point(tx, ty, params.mix_amount)
-			
+			if use_blur:
+				stroke_blur_point(tx, ty)
+			else:
+				stroke_add_point(tx, ty, params.mix_amount)
 	end_stroke()
 
 func stroke_add_point(tx, ty, strength):
@@ -395,30 +407,39 @@ func stroke_add_point(tx, ty, strength):
 		var current = current_stroke.points[encode]
 		strength = min(current + strength, 1)
 	current_stroke.points[encode] = strength
-	current_stroke.new_points[encode] = strength
+	current_stroke.new_points[encode] = true
+
+func stroke_blur_point(tx, ty):
+	var encode = encode_pair(tx, ty)
+	if !encode in current_stroke.basis:
+		# add original colour of point
+		current_stroke.basis[encode] = get_vertex_colour(tx, ty)
+	var blended_col = get_blended_color(tx, ty)
+	current_stroke.points[encode] = blended_col
+	current_stroke.new_points[encode] = true
+	
 
 # only applies new points in the stroke
 func apply_stroke_new(stroke):
-	var drawcol = stroke.colour
-	for key in stroke.new_points.keys():
-		var xy = decode_pair(key)
-		var strength = stroke.points[key]
-		var curcol = stroke.basis[key] as Color
-		drawcol.a = strength
-		set_vertex_colour(xy[0], xy[1], curcol.blend(drawcol))
+	apply_stroke(stroke, true)
 	stroke.new_points = {}
-	update_dirty_sectors()
 	
 # applies every point in the stroke
-func apply_stroke(stroke):
+func apply_stroke(stroke, new_points_only=false):
+	var abs_points = stroke.get("fullcolor_points", false)
 	var drawcol = stroke.colour
-	for key in stroke.points.keys():
+	var keys = stroke.new_points.keys() if new_points_only else stroke.points.keys()
+	for key in keys:
 		var xy = decode_pair(key)
-		var strength = stroke.points[key]
-		var curcol = stroke.basis[key] as Color
-		drawcol.a = strength
-		set_vertex_colour(xy[0], xy[1], curcol.blend(drawcol))
+		if abs_points:
+			set_vertex_colour(xy[0], xy[1], stroke.points[key])
+		else:
+			var strength = stroke.points[key]
+			var curcol = stroke.basis[key] as Color
+			drawcol.a = strength
+			set_vertex_colour(xy[0], xy[1], curcol.blend(drawcol))
 	update_dirty_sectors()
+	
 
 # set every point in the stroke to basis colour
 func revert_stroke(stroke):

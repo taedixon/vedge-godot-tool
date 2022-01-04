@@ -89,7 +89,7 @@ func _process(delta):
 				else:
 					mouse_travel = 0
 					map.end_stroke()
-			"RECT":
+			"RECT", "BLUR":
 				if (mb != 0) && rect_state == 0:
 					tool_rect = Rect2(mousepos, Vector2())
 					rect_button = mb
@@ -103,8 +103,14 @@ func _process(delta):
 						map.add_stroke_rect(rect_button, tool_rect, draw_param)
 						rect_state = 0
 						update()
+					elif rect_state == -1:
+						rect_state = 0
 					else:
 						tool_rect.size = mousepos - tool_rect.position
+			"FILL":
+				if mouse_travel > 10 && mb != 0:
+					mouse_travel = 0
+					map.add_stroke_fill(mb, draw_param)
 				
 	if Input.is_action_just_pressed("tool_redo"):
 		map.end_stroke()
@@ -135,6 +141,9 @@ func _draw():
 					"RECT":
 						if rect_state == 1:
 							draw_rect(tool_rect, Color.magenta, false, 2.0)
+					"BLUR":
+						if rect_state == 1:
+							draw_rect(tool_rect, Color.cyan, false, 2.0)
 		else:
 			var offsetA = Vector2(8, 8)
 			var offsetB = Vector2(-8, 8)
