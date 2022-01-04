@@ -6,6 +6,7 @@ onready var scene_container = $active_scene
 var scn_hsl = preload("res://scenes/hsl_editor.tscn")
 var scn_plants = preload("res://scenes/asset_metadata.tscn")
 var scn_lights = preload("res://scenes/light_editor.tscn")
+var scn_parallax = preload("res://scenes/parallax_preview.tscn")
 var active_scene = {}
 
 
@@ -50,6 +51,10 @@ func on_menu_tool(id):
 			next_scene = scn_plants.instance()
 		2:
 			next_scene = scn_lights.instance()
+			if (!GmsAssetCache.project_loaded()):
+				$project_select.popup_centered()
+		3:
+			next_scene = scn_parallax.instance()
 			if (!GmsAssetCache.project_loaded()):
 				$project_select.popup_centered()
 	if next_scene:
