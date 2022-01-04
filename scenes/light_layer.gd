@@ -93,7 +93,6 @@ func try_save_quad(x, y, f: File):
 	
 func try_save_tri(f: File, p1, p2, p3):
 	var base_col = Color.black if detail.get("is_glow") else Color.white
-	var dist = []
 	if colour_approximate(base_col, p1.c) && colour_approximate(base_col, p2.c) && colour_approximate(base_col, p3.c):
 		return
 	for p in [p1, p2, p3]:
@@ -134,7 +133,6 @@ func build_colors(layer):
 	var tileset_img = GmsAssetCache.get_tileset(layer.tilesetId.path).image as Image
 	tileset_img.lock()
 	var tileset_w = tileset_img.get_width() / 16
-	var raw_color = []
 	var tx = 0
 	var ty = 0
 	for tid in layer.tiles.TileSerialiseData:
@@ -145,7 +143,7 @@ func build_colors(layer):
 		var col = tileset_img.get_pixel(tileset_x, tileset_y)
 		set_vertex_colour(tx, ty, col)
 	tileset_img.unlock()
-	blend_color(raw_color)
+	blend_color()
 	
 func get_blended_color(tx, ty):
 	var aggregate = Color()
@@ -159,7 +157,7 @@ func get_blended_color(tx, ty):
 	aggregate.a = 1
 	return aggregate
 
-func blend_color(raw_color):
+func blend_color():
 	for ty in tile_h:
 		for tx in tile_w:
 			var aggregate = get_blended_color(tx,ty)

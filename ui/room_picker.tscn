@@ -1,0 +1,70 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://ui/room_picker.gd" type="Script" id=1]
+
+[node name="room_picker" type="Panel"]
+anchor_bottom = 1.0
+margin_right = 252.0
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="TabContainer" type="TabContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Rooms" type="VBoxContainer" parent="TabContainer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="room_filter" type="LineEdit" parent="TabContainer/Rooms"]
+margin_right = 244.0
+margin_bottom = 24.0
+placeholder_text = "Filter"
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="room_list" type="ItemList" parent="TabContainer/Rooms"]
+margin_top = 28.0
+margin_right = 244.0
+margin_bottom = 564.0
+size_flags_vertical = 3
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Layers" type="ScrollContainer" parent="TabContainer"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+size_flags_horizontal = 3
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="layer_items" type="VBoxContainer" parent="TabContainer/Layers"]
+margin_right = 244.0
+size_flags_horizontal = 3
+__meta__ = {
+"_edit_lock_": true
+}
+
+[connection signal="text_changed" from="TabContainer/Rooms/room_filter" to="." method="on_filter_change"]

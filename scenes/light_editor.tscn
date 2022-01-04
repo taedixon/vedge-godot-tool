@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://scenes/gms_map.tscn" type="PackedScene" id=1]
 [ext_resource path="res://scenes/light_editor.gd" type="Script" id=2]
 [ext_resource path="res://ui/light_toolbar.tscn" type="PackedScene" id=3]
 [ext_resource path="res://scenes/map_container.gd" type="Script" id=4]
 [ext_resource path="res://ui/dialog_light_layer_detail.tscn" type="PackedScene" id=5]
+[ext_resource path="res://ui/room_picker.tscn" type="PackedScene" id=6]
 
 [node name="light_editor" type="Control"]
 anchor_right = 1.0
@@ -32,69 +33,7 @@ __meta__ = {
 [node name="gms_map" parent="map_container" instance=ExtResource( 1 )]
 show_behind_parent = true
 
-[node name="Panel" type="Panel" parent="."]
-anchor_bottom = 1.0
-margin_right = 252.0
-__meta__ = {
-"_edit_lock_": true,
-"_edit_use_anchors_": false
-}
-
-[node name="TabContainer" type="TabContainer" parent="Panel"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-__meta__ = {
-"_edit_lock_": true,
-"_edit_use_anchors_": false
-}
-
-[node name="Rooms" type="VBoxContainer" parent="Panel/TabContainer"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 32.0
-margin_right = -4.0
-margin_bottom = -4.0
-__meta__ = {
-"_edit_lock_": true
-}
-
-[node name="room_filter" type="LineEdit" parent="Panel/TabContainer/Rooms"]
-margin_right = 244.0
-margin_bottom = 24.0
-placeholder_text = "Filter"
-__meta__ = {
-"_edit_lock_": true
-}
-
-[node name="room_list" type="ItemList" parent="Panel/TabContainer/Rooms"]
-margin_top = 28.0
-margin_right = 244.0
-margin_bottom = 564.0
-size_flags_vertical = 3
-__meta__ = {
-"_edit_lock_": true
-}
-
-[node name="Layers" type="ScrollContainer" parent="Panel/TabContainer"]
-visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 32.0
-margin_right = -4.0
-margin_bottom = -4.0
-size_flags_horizontal = 3
-__meta__ = {
-"_edit_lock_": true
-}
-
-[node name="layer_items" type="VBoxContainer" parent="Panel/TabContainer/Layers"]
-margin_right = 244.0
-size_flags_horizontal = 3
-__meta__ = {
-"_edit_lock_": true
-}
+[node name="room_picker" parent="." instance=ExtResource( 6 )]
 
 [node name="light_toolbar" parent="." instance=ExtResource( 3 )]
 margin_left = 253.0
@@ -114,6 +53,8 @@ margin_bottom = 136.0
 [connection signal="focus_exited" from="map_container" to="map_container" method="on_focus_loss"]
 [connection signal="mouse_entered" from="map_container" to="map_container" method="on_mouse_enter"]
 [connection signal="mouse_exited" from="map_container" to="map_container" method="on_mouse_exit"]
-[connection signal="text_changed" from="Panel/TabContainer/Rooms/room_filter" to="." method="on_filter_change"]
+[connection signal="layer_edit_detail" from="room_picker" to="." method="on_layer_edit_detail"]
+[connection signal="layer_selected" from="room_picker" to="." method="on_layer_select"]
+[connection signal="room_selected" from="room_picker" to="." method="on_room_select"]
 [connection signal="draw_param_changed" from="light_toolbar" to="map_container" method="on_draw_param_change"]
 [connection signal="detail_changed" from="dialog_light_layer_detail" to="." method="on_layer_detail_changed"]

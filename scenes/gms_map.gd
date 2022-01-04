@@ -6,7 +6,6 @@ export (String) var room_path setget set_room_path
 onready var layers_root = $tile_layers
 var scn_light_layer = preload("res://scenes/light_layer.tscn")
 
-var light_layers = {}
 var layer_metadata = {}
 var room_name = ""
 var show_tris = false
@@ -126,6 +125,13 @@ func create_layer_metadata(roomdata):
 				meta.kind = "tile"
 		layer_metadata[layer.name] = meta
 	find_light_layers(roomdata)
+	
+func get_light_layers():
+	var lightlayers = []
+	for layer in layer_metadata.values():
+		if layer.kind == "light":
+			lightlayers.push_back(layer.name)
+	return lightlayers
 
 func find_light_layers(roomdata):
 	for layer in roomdata.layers:
