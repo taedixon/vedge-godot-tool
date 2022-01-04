@@ -132,9 +132,9 @@ func add_background_layer(layer):
 		node.region_enabled = true
 		node.region_rect = Rect2(0, 0, spr_info.texture.get_width(), spr_info.texture.get_height())
 		if layer.htiled:
-			node.region_rect.size.x = 480
+			node.region_rect.size.x = bounds.size.x
 		if layer.vtiled:
-			node.region_rect.size.y = 270
+			node.region_rect.size.y = bounds.size.y
 		node.modulate = layer_blend
 	node.name = layer.name
 	node.visible = layer.visible
