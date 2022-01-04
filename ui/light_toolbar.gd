@@ -15,6 +15,7 @@ var draw_param = {
 	"col_rmb": Color.darkslateblue,
 	"falloff": "SQUARE",
 	"mix_amount": 0.5,
+	"show_tris": false,
 }
 
 func _ready():
@@ -56,4 +57,8 @@ func on_falloff_change(idx):
 
 func on_mix_change(mix):
 	draw_param.mix_amount = mix
+	emit_signal("draw_param_changed", draw_param)
+
+func on_show_tris_change(val):
+	draw_param.show_tris = val
 	emit_signal("draw_param_changed", draw_param)

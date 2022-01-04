@@ -28,6 +28,7 @@ func _ready():
 	
 func on_draw_param_change(params):
 	draw_param = params
+	map.set_show_tris(params.show_tris)
 	rect_state = 0
 	update()
 
@@ -144,6 +145,8 @@ func _draw():
 					"BLUR":
 						if rect_state == 1:
 							draw_rect(tool_rect, Color.cyan, false, 2.0)
+					"FILL":
+						draw_rect(Rect2(last_mouse_pos - Vector2(16, 16), Vector2(32, 32)), Color.magenta)
 		else:
 			var offsetA = Vector2(8, 8)
 			var offsetB = Vector2(-8, 8)

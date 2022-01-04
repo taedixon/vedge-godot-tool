@@ -9,6 +9,7 @@ var scn_light_layer = preload("res://scenes/light_layer.tscn")
 var light_layers = {}
 var layer_metadata = {}
 var room_name = ""
+var show_tris = false
 
 var active_layer = null
 
@@ -199,10 +200,13 @@ func layer_editable():
 	return active_layer != null && active_layer.visible
 	
 func set_active_layer(layer):
+	if layer_editable():
+		active_layer.preview_exported_triangles = false
 	active_layer = null
 	var meta = get_metadata(layer)
 	if meta && meta.kind == "light":
 		active_layer = layers_root.get_node(layer)
+		active_layer.preview_exported_triangles = show_tris
 	
 func add_stroke_point(mb, params):
 	if layer_editable():
@@ -232,3 +236,8 @@ func undo():
 func redo():
 	if layer_editable():
 		active_layer.redo()
+		
+func set_show_tris(show):
+	show_tris = show
+	if layer_editable():
+		active_layer.preview_exported_triangles = show

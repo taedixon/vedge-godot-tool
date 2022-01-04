@@ -1,6 +1,7 @@
 extends Node2D
 
 var layer_data
+var preview_exported_triangles = false setget set_export_preview
 var detail = null setget set_detail
 var tile_w = 0
 var tile_h = 0
@@ -21,6 +22,7 @@ var history_location = 0
 
 var light_mat = preload("res://shadermat/shd_light_layer.gdshader") as Shader
 var dark_mat = preload("res://shadermat/shd_shadow_layer.gdshader") as Shader
+var preview_mat = preload("res://shadermat/shd_show_exportable.gdshader") as Shader
 const gaussian_55 = [
 	1.0/256, 4.0/256, 6.0/256, 4.0/256, 1.0/256,
 	4.0/256, 16.0/256, 24.0/256, 16.0/256, 4.0/256,
@@ -46,14 +48,23 @@ func _ready():
 			build_mesh(sector)
 		create_bridge_mesh()
 		initialized = true
+		
+func set_export_preview(val):
+	if val != preview_exported_triangles:
+		preview_exported_triangles = val
+		if initialized:
+			update_mesh_material()
+		
+func update_mesh_material():
+	mesh_material = get_mesh_material()
+	for child in meshgroup.get_children():
+		child.material = mesh_material
+	bridge_mesh.material = mesh_material
 
 func set_detail(new_detail):
 	detail = new_detail
 	if initialized:
-		mesh_material = get_mesh_material()
-		for child in meshgroup.get_children():
-			child.material = mesh_material
-		bridge_mesh.material = mesh_material
+		update_mesh_material()
 
 func save(f: File):
 	detail.vertex_count = 0
@@ -205,6 +216,11 @@ func get_vertex_colour(x, y):
 
 func get_mesh_material():
 	var mesh_mat = ShaderMaterial.new()
+	if preview_exported_triangles:
+		mesh_mat.shader = preview_mat
+		mesh_mat.set_shader_param("ignore_col", Color.black if detail.get("is_glow") else Color.white)
+		mesh_mat.set_shader_param("ignore_dist", 1/256)
+		return mesh_mat
 	if detail.get("is_glow"):
 		mesh_mat.shader = light_mat
 		fill_colour = Color.black
