@@ -33,6 +33,8 @@ const gaussian_55 = [
 
 var sector_index_array = PoolIntArray()
 
+const col_min_dist = 3/256
+
 var current_stroke = null
 var initialized = false
 
@@ -91,7 +93,8 @@ func try_save_quad(x, y, f: File):
 	
 func try_save_tri(f: File, p1, p2, p3):
 	var base_col = Color.black if detail.get("is_glow") else Color.white
-	if base_col.is_equal_approx(p1.c) && base_col.is_equal_approx(p2.c) && base_col.is_equal_approx(p3.c):
+	var dist = []
+	if colour_approximate(base_col, p1.c) && colour_approximate(base_col, p2.c) && colour_approximate(base_col, p3.c):
 		return
 	for p in [p1, p2, p3]:
 		p.c.a = out_alpha
@@ -99,6 +102,10 @@ func try_save_tri(f: File, p1, p2, p3):
 		f.store_float(p.y*16)
 		f.store_32(p.c.to_abgr32())
 		detail.vertex_count += 1
+		
+func colour_approximate(c1, c2):
+	var dist = (abs(c1.r-c2.r) + abs(c1.g-c2.g) + abs(c1.b-c2.b))/3.0
+	return dist <= col_min_dist
 
 func sector_index(x, y):
 	return x + y * sector_w
@@ -219,7 +226,7 @@ func get_mesh_material():
 	if preview_exported_triangles:
 		mesh_mat.shader = preview_mat
 		mesh_mat.set_shader_param("ignore_col", Color.black if detail.get("is_glow") else Color.white)
-		mesh_mat.set_shader_param("ignore_dist", 1/256)
+		mesh_mat.set_shader_param("ignore_dist", col_min_dist)
 		return mesh_mat
 	if detail.get("is_glow"):
 		mesh_mat.shader = light_mat
