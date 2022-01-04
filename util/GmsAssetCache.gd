@@ -73,7 +73,7 @@ func populate_sprite(yydata):
 	img.load(sprite_path)
 	var tex = ImageTexture.new()
 	tex.create_from_image(img)
-	tex.flags = 3
+	tex.flags = 3 
 	sprite_info.texture = tex
 	sprite_info.offset = Vector2(-yydata.sequence.xorigin, -yydata.sequence.yorigin)
 	return sprite_info
@@ -87,6 +87,13 @@ func get_room_list():
 	
 func get_room(path):
 	return _load_yy(root_path + path)
+	
+func parse_yycolor(col_int):
+	col_int = int(col_int)
+	var r = col_int % 256
+	var g = (col_int >> 8) % 256
+	var b = (col_int >> 16) % 256
+	return Color(r/256.0, g/256.0, b/256.0, 1.0)
 	
 func _load_yy(path):
 	var f = File.new()

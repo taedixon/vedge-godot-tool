@@ -50,6 +50,8 @@ func populate_map(roomdata):
 				nodes_to_add.push_front(add_light_layer(layer))
 			"asset": 
 				nodes_to_add.push_front(add_asset_layer(layer))
+			"background":
+				nodes_to_add.push_front(add_background_layer(layer))
 	for i in nodes_to_add:
 		layers_root.add_child(i)
 		
@@ -109,6 +111,36 @@ func add_light_layer(layer):
 	node.visible = true
 	return node
 	
+func add_background_layer(layer):
+	var node
+	var layer_blend = GmsAssetCache.parse_yycolor(layer.colour)
+	if layer.spriteId == null:
+		
+		node = Node2D.new()
+		var rect = ColorRect.new()
+		rect.color = layer_blend
+		rect.rect_size = bounds.size
+		rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		node.add_child(rect)
+		pass
+	else:
+		node = Sprite.new()
+		var spr_info = GmsAssetCache.get_sprite(layer.spriteId.path)
+		node.offset = spr_info.offset
+		node.texture = spr_info.texture
+		node.centered = false
+		node.region_enabled = true
+		node.region_rect = Rect2(0, 0, spr_info.texture.get_width(), spr_info.texture.get_height())
+		if layer.htiled:
+			node.region_rect.size.x = 480
+		if layer.vtiled:
+			node.region_rect.size.y = 270
+		node.modulate = layer_blend
+	node.name = layer.name
+	node.visible = layer.visible
+	return node
+	
+	
 func create_layer_metadata(roomdata):
 	layer_metadata = {}
 	for layer in roomdata.layers:
@@ -125,6 +157,8 @@ func create_layer_metadata(roomdata):
 				meta.kind = "asset"
 			"GMRTileLayer":
 				meta.kind = "tile"
+			"GMRBackgroundLayer":
+				meta.kind = "background"
 		layer_metadata[layer.name] = meta
 	find_light_layers(roomdata)
 	find_parallax_data(roomdata)
@@ -270,7 +304,8 @@ func set_show_tris(show):
 
 func set_camera_offset(offset):
 	camera_offset = offset
-	for child in layers_root.get_children():
-		var meta = layer_metadata.get(child.name)
-		child.position.x = offset.x * meta.parallax.x
-		child.position.y = offset.y * meta.parallax.y
+	if layer_metadata:
+		for child in layers_root.get_children():
+			var meta = layer_metadata.get(child.name)
+			child.position.x = offset.x * meta.parallax.x
+			child.position.y = offset.y * meta.parallax.y
