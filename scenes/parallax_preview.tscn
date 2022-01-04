@@ -29,9 +29,20 @@ show_behind_parent = true
 
 [node name="room_picker" parent="." instance=ExtResource( 2 )]
 
+[node name="btn_reload" type="Button" parent="."]
+margin_left = 264.901
+margin_top = 10.4763
+margin_right = 360.901
+margin_bottom = 30.4763
+text = "Reload Room"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [connection signal="focus_entered" from="map_controller" to="map_controller" method="on_focus_gain"]
 [connection signal="focus_exited" from="map_controller" to="map_controller" method="on_focus_loss"]
 [connection signal="mouse_entered" from="map_controller" to="map_controller" method="on_mouse_enter"]
 [connection signal="mouse_exited" from="map_controller" to="map_controller" method="on_mouse_exit"]
 [connection signal="layer_selected" from="room_picker" to="." method="on_layer_selected"]
 [connection signal="room_selected" from="room_picker" to="." method="on_room_select"]
+[connection signal="pressed" from="btn_reload" to="." method="on_reload_room"]

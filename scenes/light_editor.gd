@@ -39,6 +39,9 @@ func on_layer_edit_detail(layer):
 
 func on_layer_detail_changed(layer, detail):
 	map.update_metadata(layer, detail)
+
+func commit_changes():
+	save()
 	
 func save():
 	map.save()

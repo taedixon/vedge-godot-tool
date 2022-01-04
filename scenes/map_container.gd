@@ -46,12 +46,15 @@ func _process(delta):
 	map.position.y -= Input.get_action_strength("scroll_down") * translate_spd *  delta
 	var prev_scale = map.scale.x
 	var new_scale = prev_scale
+	var ctrl_held = Input.is_key_pressed(KEY_CONTROL)
+	var mmb_held = (Input.get_mouse_button_mask() & BUTTON_MASK_MIDDLE) != 0
+	
 	if Input.is_action_just_released("map_zoom_in"):
 		new_scale += scale_strength
 	if Input.is_action_just_released("map_zoom_out"):
 		if map.scale.x > 0.3:
 			new_scale -= scale_strength
-	if Input.is_action_just_pressed("map_zoom_reset"):
+	if ctrl_held && Input.is_action_just_pressed("map_zoom_reset"):
 		new_scale = 1
 	if new_scale != prev_scale:
 		var scale_delta = new_scale - prev_scale
@@ -63,11 +66,14 @@ func _process(delta):
 	
 	var mousepos = get_local_mouse_position()
 	if mousepos != last_mouse_pos:
+		if !ctrl_held && mmb_held:
+			map.position += (mousepos - last_mouse_pos)
 		mouse_travel += last_mouse_pos.distance_to(mousepos)
 		last_mouse_pos = mousepos
 		update()
-		
-	colour_picking = Input.is_key_pressed(KEY_CONTROL)
+	
+	
+	colour_picking = Input.is_key_pressed(KEY_ALT)
 		
 	var mb = 0
 	if (Input.get_mouse_button_mask() & BUTTON_MASK_LEFT) != 0:

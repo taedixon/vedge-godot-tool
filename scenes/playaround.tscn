@@ -89,3 +89,22 @@ margin_bottom = 534.781
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+margin_left = 1042.82
+margin_top = 4.57214
+margin_right = 1313.82
+margin_bottom = 98.5721
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="RichTextLabel" type="RichTextLabel" parent="PanelContainer"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 264.0
+margin_bottom = 87.0
+text = "Here is some really long text. It's got a bunch of words and the words scroll across multiple lines. That's fun."
+__meta__ = {
+"_edit_use_anchors_": false
+}
