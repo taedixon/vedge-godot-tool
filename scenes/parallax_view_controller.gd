@@ -34,6 +34,7 @@ func _process(delta):
 		var margin = 16
 		map.position.x = clamp(map.position.x, -bound_begin.x + margin, -bound_end.x + rect_size.x - margin)
 		map.position.y = clamp(map.position.y, -bound_begin.y + margin, -bound_end.y + rect_size.y - margin)
+		map.camera_offset = bound_begin
 		update()
 	
 func _draw():

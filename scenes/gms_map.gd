@@ -13,6 +13,7 @@ var show_tris = false
 var active_layer = null
 
 var bounds = Rect2(0, 0, 0, 0)
+var camera_offset = Vector2(0, 0) setget set_camera_offset
 
 func _ready():
 	set_room_path(room_path)
@@ -114,7 +115,8 @@ func create_layer_metadata(roomdata):
 		var meta = {
 			"kind": "unknown",
 			"name": layer.name,
-			"detail": {}
+			"detail": {},
+			"parallax": {"x": 0, "y": 0},
 		}
 		match layer.resourceType:
 			"GMRInstanceLayer":
@@ -125,6 +127,7 @@ func create_layer_metadata(roomdata):
 				meta.kind = "tile"
 		layer_metadata[layer.name] = meta
 	find_light_layers(roomdata)
+	find_parallax_data(roomdata)
 	
 func get_light_layers():
 	var lightlayers = []
@@ -132,6 +135,23 @@ func get_light_layers():
 		if layer.kind == "light":
 			lightlayers.push_back(layer.name)
 	return lightlayers
+	
+func find_parallax_data(roomdata):
+	for layer in roomdata.layers:
+		if layer.resourceType == "GMRInstanceLayer" && layer.instances:
+			for inst in layer.instances:
+				if inst.objectId.name == "o_background":
+					var data = []
+					for prop in inst.properties:
+						if prop.propertyId.name == "layers":
+							var parsed = JSON.parse(prop.value)
+							if parsed.error == OK:
+								data = parsed.result
+					for item in data:
+						var meta = layer_metadata.get(item[0])
+						if meta:
+							meta.parallax.x = float(item[1])
+							meta.parallax.y = float(item[2])
 
 func find_light_layers(roomdata):
 	for layer in roomdata.layers:
@@ -247,3 +267,10 @@ func set_show_tris(show):
 	show_tris = show
 	if layer_editable():
 		active_layer.preview_exported_triangles = show
+
+func set_camera_offset(offset):
+	camera_offset = offset
+	for child in layers_root.get_children():
+		var meta = layer_metadata.get(child.name)
+		child.position.x = offset.x * meta.parallax.x
+		child.position.y = offset.y * meta.parallax.y
