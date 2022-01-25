@@ -7,7 +7,6 @@ onready var mapcontainer = $map_container
 onready var roomlist = $room_picker
 onready var dialog_lightlayer = $dialog_light_layer_detail
 
-
 func _ready():
 	if GmsAssetCache.project_loaded():
 		roomlist.set_room_list()

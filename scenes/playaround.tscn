@@ -56,10 +56,10 @@ mesh = SubResource( 3 )
 texture = ExtResource( 1 )
 
 [node name="ColorPicker" type="ColorPicker" parent="."]
-margin_left = 492.952
-margin_top = 6.00226
-margin_right = 814.952
-margin_bottom = 468.002
+margin_left = 496.952
+margin_top = 10.0023
+margin_right = 818.952
+margin_bottom = 472.002
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -82,10 +82,10 @@ region_enabled = true
 region_rect = Rect2( 0, 0, 800, 80 )
 
 [node name="ColorRect" type="ColorRect" parent="."]
-margin_left = 51.6138
-margin_top = 494.781
-margin_right = 83.6138
-margin_bottom = 534.781
+margin_left = 130.81
+margin_top = 256.25
+margin_right = 162.81
+margin_bottom = 296.25
 __meta__ = {
 "_edit_use_anchors_": false
 }

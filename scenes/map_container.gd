@@ -21,6 +21,8 @@ var rect_state = 0
 var rect_button = 0
 
 var colour_picking = false
+var selection_points = PoolVector2Array()
+var selection_mode = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -74,6 +76,9 @@ func _process(delta):
 	
 	
 	colour_picking = Input.is_key_pressed(KEY_ALT)
+	if Input.is_action_just_pressed("toggle_selection"):
+		selection_mode = !selection_mode
+		update()
 		
 	var mb = 0
 	if (Input.get_mouse_button_mask() & BUTTON_MASK_LEFT) != 0:
@@ -81,50 +86,105 @@ func _process(delta):
 	elif (Input.get_mouse_button_mask() & BUTTON_MASK_RIGHT) != 0:
 		mb = BUTTON_RIGHT
 		
-	if colour_picking:
-		if mb != 0:
-			var col = map.get_picked_colour()
-			if col:
-				emit_signal("colour_picked", mb, col)
+	# input handling
+	if selection_mode:
+		process_selection_tool(mb, mousepos)
+	elif colour_picking:
+		process_colour_picker(mb)
 	else:
-		match draw_param.tool:
-			"DRAW":
-				if mb != 0:
-					if mouse_travel > 4:
-						map.add_stroke_point(mb, draw_param)
-						mouse_travel = 0
-				else:
-					mouse_travel = 0
-					map.end_stroke()
-			"RECT", "BLUR":
-				if (mb != 0) && rect_state == 0:
-					tool_rect = Rect2(mousepos, Vector2())
-					rect_button = mb
-					rect_state = 1
-				else:
-					var both_mousebutton = (Input.get_mouse_button_mask() & (BUTTON_MASK_LEFT|BUTTON_MASK_RIGHT)) == BUTTON_MASK_LEFT|BUTTON_MASK_RIGHT
-					if both_mousebutton:
-						rect_state = -1
-						update()
-					elif (mb == 0) && (rect_state == 1):
-						map.add_stroke_rect(rect_button, tool_rect, draw_param)
-						rect_state = 0
-						update()
-					elif rect_state == -1:
-						rect_state = 0
-					else:
-						tool_rect.size = mousepos - tool_rect.position
-			"FILL":
-				if mouse_travel > 10 && mb != 0:
-					mouse_travel = 0
-					map.add_stroke_fill(mb, draw_param)
-				
+		process_regular_tool(mb, mousepos)
+		
+	# undo/redo
 	if Input.is_action_just_pressed("tool_redo"):
 		map.end_stroke()
 		map.redo()
 	elif Input.is_action_just_pressed("tool_undo"):
 		map.end_stroke()
 		map.undo()
+		
+func process_colour_picker(mb):
+	if mb != 0:
+		var col = map.get_picked_colour()
+		if col:
+			emit_signal("colour_picked", mb, col)
+
+func process_selection_tool(mb, mousepos):
+	if update_lasso(mb, mousepos):
+		if selection_points.size() > 1:
+			selection_points.append(selection_points[0])
+			if Input.is_key_pressed(KEY_ALT):
+				var combined = Geometry.clip_polygons_2d(map.selection, selection_points)
+				map.selection = combined[0] if combined.size() > 0 else PoolVector2Array()
+			elif Input.is_key_pressed(KEY_CONTROL):
+				var combined = Geometry.merge_polygons_2d(map.selection, selection_points)
+				map.selection = combined[0] if combined.size() > 0 else PoolVector2Array()
+			else:
+				map.selection = selection_points
+			selection_points = PoolVector2Array()
+			update()
+	
+func process_regular_tool(mb, mousepos):
+	match draw_param.tool:
+		"DRAW":
+			if mb != 0:
+				if mouse_travel > 4:
+					map.add_stroke_point(mb, draw_param)
+					mouse_travel = 0
+			else:
+				mouse_travel = 0
+				map.end_stroke()
+		"RECT", "BLUR":
+			if update_tool_rect(mb, mousepos):
+				map.add_stroke_rect(rect_button, tool_rect, draw_param)
+		"FILL":
+			if mouse_travel > 10 && mb != 0:
+				mouse_travel = 0
+				map.add_stroke_fill(mb, draw_param)
+	
+# returns true if rect was committed
+func update_tool_rect(mb, mousepos):
+	if (mb != 0) && rect_state == 0:
+		tool_rect = Rect2(mousepos, Vector2())
+		rect_button = mb
+		rect_state = 1
+	else:
+		var both_mousebutton = (Input.get_mouse_button_mask() & (BUTTON_MASK_LEFT|BUTTON_MASK_RIGHT)) == BUTTON_MASK_LEFT|BUTTON_MASK_RIGHT
+		if both_mousebutton:
+			rect_state = -1
+			update()
+		elif (mb == 0) && (rect_state == 1):
+			rect_state = 0
+			update()
+			return true
+		elif rect_state == -1:
+			rect_state = 0
+		else:
+			tool_rect.size = mousepos - tool_rect.position
+	return false
+	
+func update_lasso(mb, mousepos):
+	if (mb != 0) && rect_state == 0:
+		selection_points.append(mousepos)
+		rect_button = mb
+		rect_state = 1
+	else:
+		var both_mousebutton = (Input.get_mouse_button_mask() & (BUTTON_MASK_LEFT|BUTTON_MASK_RIGHT)) == BUTTON_MASK_LEFT|BUTTON_MASK_RIGHT
+		if both_mousebutton:
+			rect_state = -1
+			selection_points = PoolVector2Array()
+			update()
+		elif (mb == 0) && (rect_state == 1):
+			rect_state = 0
+			update()
+			return true
+		elif rect_state == -1:
+			rect_state = 0
+		elif rect_state == 1:
+			if mouse_travel > 8:
+				selection_points.append(mousepos)
+				mouse_travel = 0
+				update()
+	return false
 		
 func on_focus_loss():
 	update()
@@ -134,9 +194,12 @@ func on_focus_gain():
 
 func _draw():
 	if has_focus():
-		draw_rect(Rect2(0, 0, rect_size.x, rect_size.y), Color.wheat, false)
+		var outline = Color.deepskyblue if selection_mode else Color.wheat
+		draw_rect(Rect2(0, 0, rect_size.x, rect_size.y), outline, false)
 		if map.layer_editable():
-			if colour_picking:
+			if selection_mode && selection_points.size() >= 2:
+				draw_polyline(selection_points, Color.magenta)
+			elif colour_picking:
 				var drawcol = map.get_picked_colour()
 				if !drawcol:
 					drawcol = Color.black

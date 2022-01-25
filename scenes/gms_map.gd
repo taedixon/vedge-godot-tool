@@ -4,6 +4,7 @@ extends Node2D
 # Declare member variables here. Examples:
 export (String) var room_path setget set_room_path
 onready var layers_root = $tile_layers
+onready var overlay = $overlay
 var scn_light_layer = preload("res://scenes/light_layer.tscn")
 
 var layer_metadata = {}
@@ -14,6 +15,9 @@ var active_layer = null
 
 var bounds = Rect2(0, 0, 0, 0)
 var camera_offset = Vector2(0, 0) setget set_camera_offset
+
+var selection = PoolVector2Array() setget set_selection, get_selection
+var selection_col = PoolColorArray()
 
 func _ready():
 	set_room_path(room_path)
@@ -309,3 +313,15 @@ func set_camera_offset(offset):
 			var meta = layer_metadata.get(child.name)
 			child.position.x = offset.x * meta.parallax.x
 			child.position.y = offset.y * meta.parallax.y
+
+func set_selection(points):
+	selection = PoolVector2Array()
+	for p in points:
+		selection.append((p - position) / scale)
+	overlay.selection = selection
+
+func get_selection():
+	var translated = PoolVector2Array()
+	for p in selection:
+		translated.append(p*scale + position)
+	return translated
