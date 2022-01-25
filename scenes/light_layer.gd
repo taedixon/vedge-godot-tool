@@ -336,7 +336,8 @@ func tool_add_quad(meshbuilder: SurfaceTool, topleft: Vector2, c1: Color, c2: Co
 		meshbuilder.add_vertex(p4)
 		
 	
-func add_stroke_point(button, point: Vector2, params):
+func add_stroke_point(button, point: Vector2, params, selection):
+	var use_selection = selection.size() > 4
 	if current_stroke == null:
 		var drawcol
 		if button == BUTTON_LEFT:
@@ -354,14 +355,16 @@ func add_stroke_point(button, point: Vector2, params):
 		current_stroke.count += 1
 		
 	var xmin = max(0, ceil((point.x - params.radius)/16.0))
-	var xmax = min(tile_w - 1, floor((point.x + params.radius)/16.0))
+	var xmax = min(tile_w, floor((point.x + params.radius)/16.0))
 	var ymin = max(0, ceil((point.y - params.radius)/16.0))
-	var ymax = min(tile_h - 1, floor((point.y + params.radius)/16.0))
+	var ymax = min(tile_h, floor((point.y + params.radius)/16.0))
 	
 	for tx in range(xmin, xmax+1):
 		for ty in range(ymin, ymax+1):
-			var strength
 			var tilecoord = Vector2(tx*16, ty*16)
+			if use_selection && !(Geometry.is_point_in_polygon(tilecoord, selection)):
+				continue
+			var strength
 			var exponent
 			match params.falloff:
 				"CONST":
@@ -379,7 +382,8 @@ func add_stroke_point(button, point: Vector2, params):
 		apply_stroke_new(current_stroke)
 		current_stroke.count = 0
 		
-func add_stroke_rect(button, r: Rect2, params):
+func add_stroke_rect(button, r: Rect2, params, selection):
+	var use_selection = selection.size() > 4
 	var drawcol
 	if button == BUTTON_LEFT:
 		drawcol = params.col_lmb
@@ -408,15 +412,41 @@ func add_stroke_rect(button, r: Rect2, params):
 		p2.y = tmp
 		
 	var xmin = max(0, ceil(p1.x/16.0))
-	var xmax = min(tile_w - 1, floor(p2.x/16.0))
+	var xmax = min(tile_w, floor(p2.x/16.0))
 	var ymin = max(0, ceil(p1.y /16.0))
-	var ymax = min(tile_h - 1, floor(p2.y/16.0))
+	var ymax = min(tile_h, floor(p2.y/16.0))
 	for tx in range(xmin, xmax+1):
 		for ty in range(ymin, ymax+1):
+			if use_selection && !(Geometry.is_point_in_polygon(Vector2(tx*16, ty*16), selection)):
+				continue
 			if use_blur:
 				stroke_blur_point(tx, ty)
 			else:
 				stroke_add_point(tx, ty, params.mix_amount)
+	end_stroke()
+	
+func add_stroke_gradient(cols, p1, p2, params, selection):
+	var use_selection = selection.size() > 4
+	current_stroke = {
+		"count": 1, 
+		"points": {},
+		"new_points": {},
+		"basis": {},
+		"colour": Color.white,
+		"fullcolor_points": true,
+	}
+	var p_len = p1.distance_to(p2)
+	if p_len == 0:
+		p_len = 0.001
+	for tx in range(0, tile_w+1):
+		for ty in range(0, tile_h+1):
+			var tilecoord = Vector2(tx*16, ty*16)
+			if use_selection && !(Geometry.is_point_in_polygon(Vector2(tx*16, ty*16), selection)):
+				continue
+			var seg_point = Geometry.get_closest_point_to_segment_2d(tilecoord, p1, p2)
+			var blend_fac = p1.distance_to(seg_point)/p_len
+			var point_col = cols[0].linear_interpolate(cols[1], blend_fac)
+			stroke_add_point_color(tx, ty, point_col, params.mix_amount)
 	end_stroke()
 
 func stroke_add_point(tx, ty, strength):
@@ -429,7 +459,17 @@ func stroke_add_point(tx, ty, strength):
 		strength = min(current + strength, 1)
 	current_stroke.points[encode] = strength
 	current_stroke.new_points[encode] = true
-
+	
+func stroke_add_point_color(tx, ty, col, strength):
+	var encode = encode_pair(tx, ty)
+	if !encode in current_stroke.basis:
+		# add original colour of point
+		current_stroke.basis[encode] = get_vertex_colour(tx, ty)
+	var curcol = current_stroke.basis[encode]
+	var mixcol = curcol.linear_interpolate(col, strength)
+	current_stroke.points[encode] = mixcol
+	current_stroke.new_points[encode] = true
+	
 func stroke_blur_point(tx, ty):
 	var encode = encode_pair(tx, ty)
 	if !encode in current_stroke.basis:

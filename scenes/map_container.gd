@@ -24,10 +24,6 @@ var colour_picking = false
 var selection_points = PoolVector2Array()
 var selection_mode = false
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
-	
 func on_draw_param_change(params):
 	draw_param = params
 	map.set_show_tris(params.show_tris)
@@ -74,10 +70,13 @@ func _process(delta):
 		last_mouse_pos = mousepos
 		update()
 	
-	
 	colour_picking = Input.is_key_pressed(KEY_ALT)
 	if Input.is_action_just_pressed("toggle_selection"):
 		selection_mode = !selection_mode
+		var toast_txt = "Selection Mode" if selection_mode else "Edit Mode"
+		var toast = Toast.new(toast_txt, Toast.LENGTH_SHORT)
+		get_node("/root").add_child(toast)
+		toast.show()
 		update()
 		
 	var mb = 0
@@ -109,19 +108,35 @@ func process_colour_picker(mb):
 			emit_signal("colour_picked", mb, col)
 
 func process_selection_tool(mb, mousepos):
-	if update_lasso(mb, mousepos):
-		if selection_points.size() > 1:
-			selection_points.append(selection_points[0])
-			if Input.is_key_pressed(KEY_ALT):
-				var combined = Geometry.clip_polygons_2d(map.selection, selection_points)
-				map.selection = combined[0] if combined.size() > 0 else PoolVector2Array()
-			elif Input.is_key_pressed(KEY_CONTROL):
-				var combined = Geometry.merge_polygons_2d(map.selection, selection_points)
-				map.selection = combined[0] if combined.size() > 0 else PoolVector2Array()
+	if (mb != 0) && rect_state == 0:
+		tool_rect = Rect2(mousepos, Vector2())
+		rect_button = mb
+		rect_state = 1
+	else:
+		var using_rect = rect_button == BUTTON_RIGHT
+		var should_commit = update_lasso(mb, mousepos) if !using_rect else update_tool_rect(mb, mousepos)
+		if should_commit:
+			if using_rect:
+				selection_points = PoolVector2Array([
+					tool_rect.position,
+					tool_rect.position + Vector2(tool_rect.size.x, 0),
+					tool_rect.position + tool_rect.size,
+					tool_rect.position + Vector2(0, tool_rect.size.y),
+				])
+			if selection_points.size() > 2:
+				selection_points.append(selection_points[0])
+				if Input.is_key_pressed(KEY_ALT):
+					var combined = Geometry.clip_polygons_2d(map.selection, selection_points)
+					map.selection = combined[0] if combined.size() > 0 else PoolVector2Array()
+				elif Input.is_key_pressed(KEY_CONTROL):
+					var combined = Geometry.merge_polygons_2d(map.selection, selection_points)
+					map.selection = combined[0] if combined.size() > 0 else PoolVector2Array()
+				else:
+					map.selection = selection_points
+				update()
 			else:
-				map.selection = selection_points
+				map.selection = PoolVector2Array()
 			selection_points = PoolVector2Array()
-			update()
 	
 func process_regular_tool(mb, mousepos):
 	match draw_param.tool:
@@ -140,6 +155,9 @@ func process_regular_tool(mb, mousepos):
 			if mouse_travel > 10 && mb != 0:
 				mouse_travel = 0
 				map.add_stroke_fill(mb, draw_param)
+		"GRAD":
+			if update_tool_rect(mb, mousepos):
+				map.add_stroke_gradient(get_gradient_colors(), tool_rect.position, tool_rect.position + tool_rect.size, draw_param)
 	
 # returns true if rect was committed
 func update_tool_rect(mb, mousepos):
@@ -156,7 +174,7 @@ func update_tool_rect(mb, mousepos):
 			rect_state = 0
 			update()
 			return true
-		elif rect_state == -1:
+		elif (mb == 0) && rect_state == -1:
 			rect_state = 0
 		else:
 			tool_rect.size = mousepos - tool_rect.position
@@ -177,7 +195,7 @@ func update_lasso(mb, mousepos):
 			rect_state = 0
 			update()
 			return true
-		elif rect_state == -1:
+		elif (mb == 0) && rect_state == -1:
 			rect_state = 0
 		elif rect_state == 1:
 			if mouse_travel > 8:
@@ -195,10 +213,13 @@ func on_focus_gain():
 func _draw():
 	if has_focus():
 		var outline = Color.deepskyblue if selection_mode else Color.wheat
-		draw_rect(Rect2(0, 0, rect_size.x, rect_size.y), outline, false)
+		draw_rect(Rect2(0, 0, rect_size.x, rect_size.y), outline, false, 2.0)
 		if map.layer_editable():
-			if selection_mode && selection_points.size() >= 2:
-				draw_polyline(selection_points, Color.magenta)
+			if selection_mode && rect_state == 1:
+				if rect_button == BUTTON_LEFT:
+					draw_polyline(selection_points, Color.magenta)
+				else:
+					draw_rect(tool_rect, Color.magenta, false)
 			elif colour_picking:
 				var drawcol = map.get_picked_colour()
 				if !drawcol:
@@ -216,12 +237,20 @@ func _draw():
 							draw_rect(tool_rect, Color.cyan, false, 2.0)
 					"FILL":
 						draw_rect(Rect2(last_mouse_pos - Vector2(16, 16), Vector2(32, 32)), Color.magenta)
+					"GRAD":
+						if rect_state == 1:
+							var pl_point = PoolVector2Array([tool_rect.position, tool_rect.position + tool_rect.size])
+							var arr_col = get_gradient_colors()
+							var pl_col = PoolColorArray(arr_col) 
+							draw_polyline_colors(pl_point, pl_col, 2, true)
 		else:
 			var offsetA = Vector2(8, 8)
 			var offsetB = Vector2(-8, 8)
 			draw_line(last_mouse_pos + offsetA, last_mouse_pos - offsetA, Color.red, 2)
 			draw_line(last_mouse_pos + offsetB, last_mouse_pos - offsetB, Color.red, 2)
-				
+
+func get_gradient_colors():
+	return [draw_param.col_lmb, draw_param.col_rmb] if rect_button == BUTTON_LEFT else [draw_param.col_rmb, draw_param.col_lmb]
 
 func on_mouse_exit():
 	release_focus()

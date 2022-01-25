@@ -17,7 +17,6 @@ var bounds = Rect2(0, 0, 0, 0)
 var camera_offset = Vector2(0, 0) setget set_camera_offset
 
 var selection = PoolVector2Array() setget set_selection, get_selection
-var selection_col = PoolColorArray()
 
 func _ready():
 	set_room_path(room_path)
@@ -274,16 +273,22 @@ func set_active_layer(layer):
 	
 func add_stroke_point(mb, params):
 	if layer_editable():
-		active_layer.add_stroke_point(mb, get_local_mouse_position(), params)
+		active_layer.add_stroke_point(mb, get_local_mouse_position(), params, selection)
 
 func add_stroke_rect(mb, rec: Rect2, params):
 	if layer_editable():
 		var rec_local = Rect2((rec.position - position)/scale, rec.size / scale)
-		active_layer.add_stroke_rect(mb, rec_local, params)
+		active_layer.add_stroke_rect(mb, rec_local, params, selection)
 
 func add_stroke_fill(mb, params):
 	if layer_editable():
-		active_layer.add_stroke_rect(mb, bounds, params)
+		active_layer.add_stroke_rect(mb, bounds, params, selection)
+		
+func add_stroke_gradient(grad_color, p1, p2, params):
+	if layer_editable():
+		var p1_local = (p1-position)/scale
+		var p2_local = (p2-position)/scale
+		active_layer.add_stroke_gradient(grad_color, p1_local, p2_local, params, selection)
 
 func end_stroke():
 	if layer_editable():
