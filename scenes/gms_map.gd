@@ -276,19 +276,23 @@ func set_active_layer(layer):
 	
 func add_stroke_point(mb, params):
 	if layer_editable():
+		params.invert_selection = overlay.invert_enable
 		active_layer.add_stroke_point(mb, get_local_mouse_position(), params, selection)
 
 func add_stroke_rect(mb, rec: Rect2, params):
 	if layer_editable():
+		params.invert_selection = overlay.invert_enable
 		var rec_local = Rect2((rec.position - position)/scale, rec.size / scale)
 		active_layer.add_stroke_rect(mb, rec_local, params, selection)
 
 func add_stroke_fill(mb, params):
 	if layer_editable():
+		params.invert_selection = overlay.invert_enable
 		active_layer.add_stroke_rect(mb, bounds, params, selection)
 		
 func add_stroke_gradient(grad_color, p1, p2, params):
 	if layer_editable():
+		params.invert_selection = overlay.invert_enable
 		var p1_local = (p1-position)/scale
 		var p2_local = (p2-position)/scale
 		active_layer.add_stroke_gradient(grad_color, p1_local, p2_local, params, selection)
@@ -333,3 +337,6 @@ func get_selection():
 	for p in selection:
 		translated.append(p*scale + position)
 	return translated
+
+func set_selection_invert(is_invert):
+	overlay.invert_enable = is_invert

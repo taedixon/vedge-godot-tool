@@ -362,7 +362,7 @@ func add_stroke_point(button, point: Vector2, params, selection):
 	for tx in range(xmin, xmax+1):
 		for ty in range(ymin, ymax+1):
 			var tilecoord = Vector2(tx*16, ty*16)
-			if use_selection && !(Geometry.is_point_in_polygon(tilecoord, selection)):
+			if use_selection && (Geometry.is_point_in_polygon(tilecoord, selection) == params.invert_selection):
 				continue
 			var strength
 			var exponent
@@ -417,7 +417,7 @@ func add_stroke_rect(button, r: Rect2, params, selection):
 	var ymax = min(tile_h, floor(p2.y/16.0))
 	for tx in range(xmin, xmax+1):
 		for ty in range(ymin, ymax+1):
-			if use_selection && !(Geometry.is_point_in_polygon(Vector2(tx*16, ty*16), selection)):
+			if use_selection && (Geometry.is_point_in_polygon(Vector2(tx*16, ty*16), selection) == params.invert_selection):
 				continue
 			if use_blur:
 				stroke_blur_point(tx, ty)
@@ -441,7 +441,7 @@ func add_stroke_gradient(cols, p1, p2, params, selection):
 	for tx in range(0, tile_w+1):
 		for ty in range(0, tile_h+1):
 			var tilecoord = Vector2(tx*16, ty*16)
-			if use_selection && !(Geometry.is_point_in_polygon(Vector2(tx*16, ty*16), selection)):
+			if use_selection && (Geometry.is_point_in_polygon(Vector2(tx*16, ty*16), selection) == params.invert_selection):
 				continue
 			var seg_point = Geometry.get_closest_point_to_segment_2d(tilecoord, p1, p2)
 			var blend_fac = p1.distance_to(seg_point)/p_len

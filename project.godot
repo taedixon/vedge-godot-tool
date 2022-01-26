@@ -41,6 +41,10 @@ config/icon="res://icon.png"
 GmsAssetCache="*res://util/GmsAssetCache.gd"
 Config="*res://util/Config.gd"
 
+[display]
+
+window/size/width=1280
+
 [editor_plugins]
 
 enabled=PoolStringArray( "res://addons/toast/plugin.cfg" )

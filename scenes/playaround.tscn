@@ -56,10 +56,10 @@ mesh = SubResource( 3 )
 texture = ExtResource( 1 )
 
 [node name="ColorPicker" type="ColorPicker" parent="."]
-margin_left = 496.952
-margin_top = 10.0023
-margin_right = 818.952
-margin_bottom = 472.002
+margin_left = 500.952
+margin_top = 14.0023
+margin_right = 822.952
+margin_bottom = 476.002
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -108,3 +108,7 @@ text = "Here is some really long text. It's got a bunch of words and the words s
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+invert_enable = true
+polygon = PoolVector2Array( 17.395, 16.1067, -75.472, 93.4172, -2.87549, 142.915, 87.163, 113.688, 115.919, 34.4915 )

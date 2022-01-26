@@ -7,14 +7,10 @@ onready var map = $gms_map
 var active_layer = null
 var last_mouse_pos = Vector2()
 var mouse_travel = 0
-var draw_param = {
-	"tool": "DRAW",
-	"radius": 32,
-	"col_lmb": Color.maroon,
-	"col_rmb": Color.darkslateblue,
-	"falloff": "SQUARE",
-	"mix": 0.5,
-}
+var draw_param = { }
+
+var selection_param = { }
+
 var tool_rect = Rect2()
 var rect_state = 0
 var rect_button = 0
@@ -29,6 +25,24 @@ func on_draw_param_change(params):
 	rect_state = 0
 	update()
 	map.set_overlay_visible(params.show_selection)
+	
+func on_selection_param_change(params):
+	selection_param = params
+	rect_state = 0
+	map.set_selection_invert(params.inverted)
+	update()
+	
+func on_selection_mode_toggle(state):
+	selection_mode = state
+	if selection_mode:
+		map.set_overlay_visible(true)
+	else:
+		map.set_overlay_visible(draw_param.show_selection)
+	var toast_txt = "Selection Mode" if selection_mode else "Edit Mode"
+	var toast = Toast.new(toast_txt, Toast.LENGTH_SHORT)
+	get_node("/root").add_child(toast)
+	toast.show()
+	update()
 
 func _process(delta):
 	if !has_focus():
@@ -67,17 +81,9 @@ func _process(delta):
 		if !ctrl_held && mmb_held:
 			map.position += (mousepos - last_mouse_pos)
 		mouse_travel += last_mouse_pos.distance_to(mousepos)
-		last_mouse_pos = mousepos
 		update()
 	
 	colour_picking = Input.is_key_pressed(KEY_ALT)
-	if Input.is_action_just_pressed("toggle_selection"):
-		selection_mode = !selection_mode
-		var toast_txt = "Selection Mode" if selection_mode else "Edit Mode"
-		var toast = Toast.new(toast_txt, Toast.LENGTH_SHORT)
-		get_node("/root").add_child(toast)
-		toast.show()
-		update()
 		
 	var mb = 0
 	if (Input.get_mouse_button_mask() & BUTTON_MASK_LEFT) != 0:
@@ -100,6 +106,7 @@ func _process(delta):
 	elif Input.is_action_just_pressed("tool_undo"):
 		map.end_stroke()
 		map.undo()
+	last_mouse_pos = mousepos
 		
 func process_colour_picker(mb):
 	if mb != 0:
@@ -108,35 +115,45 @@ func process_colour_picker(mb):
 			emit_signal("colour_picked", mb, col)
 
 func process_selection_tool(mb, mousepos):
-	if (mb != 0) && rect_state == 0:
-		tool_rect = Rect2(mousepos, Vector2())
-		rect_button = mb
-		rect_state = 1
-	else:
-		var using_rect = rect_button == BUTTON_RIGHT
-		var should_commit = update_lasso(mb, mousepos) if !using_rect else update_tool_rect(mb, mousepos)
-		if should_commit:
-			if using_rect:
-				selection_points = PoolVector2Array([
-					tool_rect.position,
-					tool_rect.position + Vector2(tool_rect.size.x, 0),
-					tool_rect.position + tool_rect.size,
-					tool_rect.position + Vector2(0, tool_rect.size.y),
-				])
-			if selection_points.size() > 2:
-				selection_points.append(selection_points[0])
-				if Input.is_key_pressed(KEY_ALT):
-					var combined = Geometry.clip_polygons_2d(map.selection, selection_points)
-					map.selection = combined[0] if combined.size() > 0 else PoolVector2Array()
-				elif Input.is_key_pressed(KEY_CONTROL):
-					var combined = Geometry.merge_polygons_2d(map.selection, selection_points)
-					map.selection = combined[0] if combined.size() > 0 else PoolVector2Array()
+	var should_commit = false
+	match selection_param.tool:
+		"LASSO":
+			should_commit = update_lasso(mb, mousepos)
+		"RECT":
+			should_commit = update_tool_rect(mb, mousepos)
+			if should_commit:
+				if abs(tool_rect.get_area()) > 64:
+					selection_points = PoolVector2Array([
+						tool_rect.position,
+						tool_rect.position + Vector2(tool_rect.size.x, 0),
+						tool_rect.position + tool_rect.size,
+						tool_rect.position + Vector2(0, tool_rect.size.y),
+					])
 				else:
-					map.selection = selection_points
-				update()
+					selection_points = PoolVector2Array()
+		"GRAB":
+			update_tool_rect(mb, mousepos)
+			if rect_state == 1:
+				var mouse_delta = mousepos - last_mouse_pos
+				var transform = Transform2D(0, mouse_delta)
+				map.selection = transform.xform(map.selection)
+	if should_commit:
+		if selection_points.size() > 3:
+			selection_points.append(selection_points[0])
+			if Input.is_key_pressed(KEY_SHIFT):
+				var combined = Geometry.clip_polygons_2d(map.selection, selection_points)
+				if combined.size() == 1:
+					map.selection = combined[0]
+			elif Input.is_key_pressed(KEY_CONTROL):
+				var combined = Geometry.merge_polygons_2d(map.selection, selection_points)
+				if combined.size() == 1:
+					map.selection = combined[0]
 			else:
-				map.selection = PoolVector2Array()
-			selection_points = PoolVector2Array()
+				map.selection = selection_points
+			update()
+		else:
+			map.selection = PoolVector2Array()
+		selection_points = PoolVector2Array()
 	
 func process_regular_tool(mb, mousepos):
 	match draw_param.tool:
@@ -216,11 +233,13 @@ func _draw():
 		draw_rect(Rect2(0, 0, rect_size.x, rect_size.y), outline, false, 2.0)
 		if map.layer_editable():
 			if selection_mode:
-				if rect_state == 1:
-					if rect_button == BUTTON_LEFT && selection_points.size() > 2:
-						draw_polyline(selection_points, Color.magenta)
-					else:
-						draw_rect(tool_rect, Color.magenta, false)
+				match selection_param.tool:
+					"LASSO":
+						if rect_state == 1 && selection_points.size() > 2:
+							draw_polyline(selection_points, Color.magenta)
+					"RECT":
+						if rect_state == 1:
+							draw_rect(tool_rect, Color.magenta, false)
 			elif colour_picking:
 				var drawcol = map.get_picked_colour()
 				if !drawcol:
@@ -260,3 +279,6 @@ func on_mouse_exit():
 func on_mouse_enter():
 	grab_focus()
 
+func on_request_selection_clear():
+	selection_points = PoolVector2Array()
+	map.selection = selection_points

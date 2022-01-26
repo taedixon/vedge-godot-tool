@@ -57,4 +57,7 @@ margin_bottom = 136.0
 [connection signal="layer_selected" from="room_picker" to="." method="on_layer_select"]
 [connection signal="room_selected" from="room_picker" to="." method="on_room_select"]
 [connection signal="draw_param_changed" from="light_toolbar" to="map_container" method="on_draw_param_change"]
+[connection signal="request_selection_clear" from="light_toolbar" to="map_container" method="on_request_selection_clear"]
+[connection signal="selection_mode_toggle" from="light_toolbar" to="map_container" method="on_selection_mode_toggle"]
+[connection signal="selection_param_changed" from="light_toolbar" to="map_container" method="on_selection_param_change"]
 [connection signal="detail_changed" from="dialog_light_layer_detail" to="." method="on_layer_detail_changed"]
