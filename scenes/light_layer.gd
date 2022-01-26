@@ -546,7 +546,6 @@ func undo():
 		history_location -= 1
 		var stroke_to_undo = stroke_history[history_location]
 		revert_stroke(stroke_to_undo)
-		pass
 	
 func redo():
 	if history_location < stroke_history.size():

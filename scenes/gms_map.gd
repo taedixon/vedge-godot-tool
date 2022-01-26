@@ -37,6 +37,9 @@ func layer_toggle_visible(layer, vis):
 		if child.name == layer:
 			child.visible = vis
 			
+func set_overlay_visible(vis):
+	overlay.visible = vis
+			
 func populate_map(roomdata):
 	bounds.size = Vector2(roomdata.roomSettings.Width,roomdata.roomSettings.Height)
 	room_name = roomdata.name

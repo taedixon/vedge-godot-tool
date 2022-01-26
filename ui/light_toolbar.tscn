@@ -16,7 +16,7 @@ margin_top = 7.0
 margin_right = 1017.0
 margin_bottom = 65.0
 custom_constants/hseparation = 20
-columns = 7
+columns = 8
 
 [node name="label_tool" type="Label" parent="GridContainer"]
 margin_right = 69.0
@@ -58,6 +58,15 @@ margin_left = 497.0
 margin_right = 573.0
 margin_bottom = 14.0
 text = "SHOW TRIS"
+
+[node name="label_selection" type="Label" parent="GridContainer"]
+margin_left = 593.0
+margin_right = 707.0
+margin_bottom = 14.0
+text = "SHOW SELECTION"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="tool_select" type="OptionButton" parent="GridContainer"]
 margin_top = 18.0
@@ -120,16 +129,28 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="CheckButton" type="CheckButton" parent="GridContainer"]
+[node name="btn_tris" type="CheckButton" parent="GridContainer"]
 margin_left = 497.0
 margin_top = 18.0
 margin_right = 573.0
 margin_bottom = 58.0
 
+[node name="btn_selection" type="CheckButton" parent="GridContainer"]
+margin_left = 612.0
+margin_top = 18.0
+margin_right = 688.0
+margin_bottom = 58.0
+grow_horizontal = 0
+size_flags_horizontal = 4
+pressed = true
+
 [connection signal="item_selected" from="GridContainer/tool_select" to="." method="on_tool_change"]
 [connection signal="color_changed" from="GridContainer/col_lmb" to="." method="on_col_lmb_change"]
+[connection signal="popup_closed" from="GridContainer/col_lmb" to="." method="on_col_lmb_popup_closed"]
 [connection signal="color_changed" from="GridContainer/col_rmb" to="." method="on_col_rmb_change"]
+[connection signal="popup_closed" from="GridContainer/col_rmb" to="." method="on_col_rmb_popup_closed"]
 [connection signal="value_changed" from="GridContainer/radius_select" to="." method="on_radius_change"]
 [connection signal="item_selected" from="GridContainer/falloff_select" to="." method="on_falloff_change"]
 [connection signal="value_changed" from="GridContainer/mix_strength" to="." method="on_mix_change"]
-[connection signal="toggled" from="GridContainer/CheckButton" to="." method="on_show_tris_change"]
+[connection signal="toggled" from="GridContainer/btn_tris" to="." method="on_show_tris_change"]
+[connection signal="toggled" from="GridContainer/btn_selection" to="." method="on_show_selection_change"]

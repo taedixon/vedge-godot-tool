@@ -2,7 +2,6 @@ extends Control
 
 signal colour_picked(mousebutton, colour)
 
-
 # Declare member variables here. Examples:
 onready var map = $gms_map
 var active_layer = null
@@ -29,6 +28,7 @@ func on_draw_param_change(params):
 	map.set_show_tris(params.show_tris)
 	rect_state = 0
 	update()
+	map.set_overlay_visible(params.show_selection)
 
 func _process(delta):
 	if !has_focus():
@@ -215,11 +215,12 @@ func _draw():
 		var outline = Color.deepskyblue if selection_mode else Color.wheat
 		draw_rect(Rect2(0, 0, rect_size.x, rect_size.y), outline, false, 2.0)
 		if map.layer_editable():
-			if selection_mode && rect_state == 1:
-				if rect_button == BUTTON_LEFT:
-					draw_polyline(selection_points, Color.magenta)
-				else:
-					draw_rect(tool_rect, Color.magenta, false)
+			if selection_mode:
+				if rect_state == 1:
+					if rect_button == BUTTON_LEFT && selection_points.size() > 2:
+						draw_polyline(selection_points, Color.magenta)
+					else:
+						draw_rect(tool_rect, Color.magenta, false)
 			elif colour_picking:
 				var drawcol = map.get_picked_colour()
 				if !drawcol:
