@@ -66,15 +66,18 @@ func load_sprite(path):
 		
 func populate_sprite(yydata):
 	var sprite_info = {}
-	var frame = yydata.frames[0].compositeImage
-	var sprite_folder = frame.FrameId.path.get_base_dir() + "/"
-	var sprite_path = root_path + sprite_folder + frame.FrameId.name + ".png"
-	var img = Image.new()
-	img.load(sprite_path)
-	var tex = ImageTexture.new()
-	tex.create_from_image(img)
-	tex.flags = 3 
-	sprite_info.texture = tex
+	sprite_info.frames = []
+	for f in yydata.frames:
+		var frame = f.compositeImage
+		var sprite_folder = frame.FrameId.path.get_base_dir() + "/"
+		var sprite_path = root_path + sprite_folder + frame.FrameId.name + ".png"
+		var img = Image.new()
+		img.load(sprite_path)
+		var tex = ImageTexture.new()
+		tex.create_from_image(img)
+		tex.flags = 3
+		sprite_info.frames.append(tex)
+	sprite_info.texture = sprite_info.frames[0]
 	sprite_info.offset = Vector2(-yydata.sequence.xorigin, -yydata.sequence.yorigin)
 	return sprite_info
 
@@ -84,8 +87,15 @@ func get_room_list():
 		if res.id.path.begins_with("rooms/"):
 			list.push_front(res.id)
 	return list
+
+func get_sprite_list():
+	var list = []
+	for res in project.resources:
+		if res.id.path.begins_with("sprites/"):
+			list.push_front(res.id)
+	return list
 	
-func get_room(path):
+func get_yy(path):
 	return _load_yy(root_path + path)
 	
 func parse_yycolor(col_int):

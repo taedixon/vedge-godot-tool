@@ -27,7 +27,7 @@ func set_room_path(p):
 		load_room_data(room_path)
 
 func load_room_data(path):
-	var _roomdata = GmsAssetCache.get_room(path)
+	var _roomdata = GmsAssetCache.get_yy(path)
 	active_layer = null
 	if _roomdata:
 		populate_map(_roomdata)
@@ -213,7 +213,7 @@ func find_light_layers(roomdata):
 					var meta = layer_metadata[inst_simple.layer_name]
 					inst_simple.vertex_count = 0
 					inst_simple.version = "vtf_lightmap_1"
-					inst_simple.build = "dev_nov2021" 
+					inst_simple.build = "baked" 
 					meta.detail = inst_simple
 					meta.kind = "light"
 					

@@ -60,7 +60,7 @@ func _set_light_layers(layers):
 func set_layer_list(room_path):
 	for child in layerlist.get_children():
 		layerlist.remove_child(child)
-	var roomdata = GmsAssetCache.get_room(room_path)
+	var roomdata = GmsAssetCache.get_yy(room_path)
 	for layer in roomdata.layers:
 		var layer_type = layer.resourceType
 		if layer_type == "GMRTileLayer" || layer_type == "GMRAssetLayer" || layer_type == "GMRBackgroundLayer":

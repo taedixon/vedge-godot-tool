@@ -1,4 +1,4 @@
-[gd_scene load_steps=59 format=2]
+[gd_scene load_steps=62 format=2]
 
 [ext_resource path="res://img/matts_leaves/TreesLeaves0004.png" type="Texture" id=1]
 [ext_resource path="res://img/matts_leaves/TreesLeaves0012.png" type="Texture" id=2]
@@ -58,6 +58,9 @@
 [ext_resource path="res://img/grass_batch/Ivy_01.png" type="Texture" id=56]
 [ext_resource path="res://img/grass_batch/s_grass_prop_03.png" type="Texture" id=57]
 [ext_resource path="res://img/grass_batch/s_grass_prop_04.png" type="Texture" id=58]
+[ext_resource path="res://img/misc/s_bits_bluestone_strip6.png" type="Texture" id=59]
+[ext_resource path="res://img/misc/s_weirdfern_strip03.png" type="Texture" id=60]
+[ext_resource path="res://img/misc/s_weirdvine_strip03.png" type="Texture" id=61]
 
 [node name="plant_thing" type="Control"]
 anchor_right = 1.0
@@ -68,6 +71,16 @@ __meta__ = {
 }
 
 [node name="assets" type="Node2D" parent="."]
+
+[node name="s_weirdfern_strip03" type="Sprite" parent="assets"]
+position = Vector2( 515.667, 511.167 )
+texture = ExtResource( 60 )
+centered = false
+offset = Vector2( -9.76617, -36.614 )
+hframes = 3
+script = ExtResource( 24 )
+weight_end = Vector2( 14, -38 )
+gml_asset_name = "s_weirdfern"
 
 [node name="Sprite" parent="assets" instance=ExtResource( 30 )]
 position = Vector2( 47.5187, -219.102 )
@@ -477,6 +490,25 @@ centered = false
 offset = Vector2( -17.1969, -40.2141 )
 script = ExtResource( 24 )
 weight_end = Vector2( 0, -36 )
+
+[node name="s_bits_bluestone_strip6" type="Sprite" parent="assets"]
+position = Vector2( 514.728, 439.272 )
+texture = ExtResource( 59 )
+centered = false
+offset = Vector2( -2, -2 )
+hframes = 6
+script = ExtResource( 24 )
+gml_asset_name = "s_bits_bluestone"
+
+[node name="s_weirdvine_strip03" type="Sprite" parent="assets"]
+position = Vector2( 478.667, 530.667 )
+texture = ExtResource( 61 )
+centered = false
+offset = Vector2( -16, -10 )
+hframes = 3
+script = ExtResource( 24 )
+weight_end = Vector2( 0, 48 )
+gml_asset_name = "s_weirdvine"
 
 [node name="output" type="TextEdit" parent="."]
 anchor_left = 1.0

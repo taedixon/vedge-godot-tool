@@ -67,7 +67,7 @@ margin_left = 39.0
 margin_right = 78.0
 margin_bottom = 20.0
 text = "Tool"
-items = [ "Colour Change Preview", null, 0, false, false, 0, 0, null, "", false, "Dynamic Plant Config", null, 0, false, false, 1, 0, null, "", false, "Light Layers", null, 0, false, false, 2, 0, null, "", false, "Parallax Preview", null, 0, false, false, 3, 0, null, "", false ]
+items = [ "Colour Change Preview", null, 0, false, false, 0, 0, null, "", false, "Dynamic Plant Config", null, 0, false, false, 1, 0, null, "", false, "Light Layers", null, 0, false, false, 2, 0, null, "", false, "Parallax Preview", null, 0, false, false, 3, 0, null, "", false, "Hitbox Tool", null, 0, false, false, 4, 0, null, "", false ]
 switch_on_hover = true
 __meta__ = {
 "_edit_lock_": true

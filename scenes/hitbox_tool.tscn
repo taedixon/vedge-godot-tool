@@ -1,0 +1,381 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://icon.png" type="Texture" id=1]
+[ext_resource path="res://scenes/hitbox_tool.gd" type="Script" id=2]
+[ext_resource path="res://img/internal/grid_16.png" type="Texture" id=3]
+[ext_resource path="res://scenes/hitbox_edit_controller.gd" type="Script" id=4]
+[ext_resource path="res://scenes/hitbox_visualize.gd" type="Script" id=5]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0, 0, 0, 1 )
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0, 0, 0, 1 )
+
+[node name="hitbox_tool" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="sprite_container" type="CenterContainer" parent="."]
+anchor_right = 0.675
+anchor_bottom = 1.0
+margin_left = -0.593933
+margin_right = 1.40607
+margin_bottom = -2.0
+focus_mode = 1
+script = ExtResource( 4 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Control" type="Control" parent="sprite_container"]
+show_behind_parent = true
+margin_left = 433.0
+margin_top = 299.0
+margin_right = 433.0
+margin_bottom = 299.0
+
+[node name="sprite_root" type="Node2D" parent="sprite_container/Control"]
+position = Vector2( 0, 128 )
+scale = Vector2( 3, 3 )
+script = ExtResource( 5 )
+
+[node name="bg" type="Sprite" parent="sprite_container/Control/sprite_root"]
+modulate = Color( 0.639216, 0.639216, 0.639216, 0.388235 )
+show_behind_parent = true
+texture = ExtResource( 3 )
+region_enabled = true
+region_rect = Rect2( 0, 0, 512, 512 )
+
+[node name="Sprite" type="Sprite" parent="sprite_container/Control/sprite_root"]
+show_behind_parent = true
+texture = ExtResource( 1 )
+centered = false
+offset = Vector2( -48, -48 )
+
+[node name="Polygon2D" type="Polygon2D" parent="sprite_container/Control/sprite_root"]
+show_behind_parent = true
+color = Color( 1, 0, 0, 1 )
+polygon = PoolVector2Array( -1.49757, 0.479622, 0.279648, -1.26643, 1.99452, 0.510803, 0.34201, 2.31921 )
+
+[node name="tool_panel" type="Panel" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -415.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="tool_panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 9.0
+margin_top = 8.0
+margin_right = -10.0
+margin_bottom = -8.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="sprite_name_filter" type="LineEdit" parent="tool_panel/VBoxContainer"]
+margin_right = 396.0
+margin_bottom = 24.0
+clear_button_enabled = true
+placeholder_text = "Filter"
+
+[node name="sprite_list" type="ItemList" parent="tool_panel/VBoxContainer"]
+margin_top = 28.0
+margin_right = 396.0
+margin_bottom = 336.0
+size_flags_vertical = 3
+
+[node name="slash_opts" type="GridContainer" parent="tool_panel/VBoxContainer"]
+margin_left = 45.0
+margin_top = 340.0
+margin_right = 351.0
+margin_bottom = 560.0
+size_flags_horizontal = 4
+columns = 4
+
+[node name="l_startframe" type="Label" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_top = 5.0
+margin_right = 73.0
+margin_bottom = 19.0
+text = "Start Frame"
+
+[node name="e_startframe" type="SpinBox" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 77.0
+margin_right = 151.0
+margin_bottom = 24.0
+
+[node name="l_launchprop" type="Label" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 155.0
+margin_top = 5.0
+margin_right = 228.0
+margin_bottom = 19.0
+text = "slash_p"
+
+[node name="e_launchtype" type="OptionButton" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 232.0
+margin_right = 306.0
+margin_bottom = 24.0
+text = "none"
+items = [ "none", null, false, 0, null, "l_up", null, false, 1, null, "l_down", null, false, 2, null, "l_side", null, false, 3, null, "l_up_diag", null, false, 4, null, "l_down_diag", null, false, 5, null, "bounce", null, false, 6, null, "custom", null, false, 7, null ]
+selected = 0
+
+[node name="l_follows" type="Label" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_top = 33.0
+margin_right = 73.0
+margin_bottom = 47.0
+text = "Follows"
+
+[node name="e_follows" type="CheckBox" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 77.0
+margin_top = 28.0
+margin_right = 151.0
+margin_bottom = 52.0
+
+[node name="l_dmg" type="Label" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 155.0
+margin_top = 33.0
+margin_right = 228.0
+margin_bottom = 47.0
+text = "Damage"
+
+[node name="e_damage" type="SpinBox" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 232.0
+margin_top = 28.0
+margin_right = 306.0
+margin_bottom = 52.0
+max_value = 999999.0
+value = 150.0
+
+[node name="l_poise" type="Label" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_top = 61.0
+margin_right = 73.0
+margin_bottom = 75.0
+text = "Poise"
+
+[node name="e_poise" type="SpinBox" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 77.0
+margin_top = 56.0
+margin_right = 151.0
+margin_bottom = 80.0
+
+[node name="l_meter" type="Label" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 155.0
+margin_top = 61.0
+margin_right = 228.0
+margin_bottom = 75.0
+text = "Meter"
+
+[node name="e_meter" type="SpinBox" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 232.0
+margin_top = 56.0
+margin_right = 306.0
+margin_bottom = 80.0
+max_value = 999999.0
+value = 5.0
+
+[node name="l_hitcount" type="Label" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_top = 89.0
+margin_right = 73.0
+margin_bottom = 103.0
+text = "Hitcount"
+
+[node name="e_hitcount" type="SpinBox" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 77.0
+margin_top = 84.0
+margin_right = 151.0
+margin_bottom = 108.0
+value = 1.0
+
+[node name="l_hitdelay" type="Label" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 155.0
+margin_top = 89.0
+margin_right = 228.0
+margin_bottom = 103.0
+text = "Hitdelay"
+
+[node name="e_hitdelay" type="SpinBox" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 232.0
+margin_top = 84.0
+margin_right = 306.0
+margin_bottom = 108.0
+
+[node name="l_continuous" type="Label" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_top = 117.0
+margin_right = 73.0
+margin_bottom = 131.0
+text = "Continuous"
+
+[node name="e_continuous" type="CheckBox" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 77.0
+margin_top = 112.0
+margin_right = 151.0
+margin_bottom = 136.0
+
+[node name="l_startframe2" type="Label" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 155.0
+margin_top = 117.0
+margin_right = 228.0
+margin_bottom = 131.0
+text = "dmg frame"
+
+[node name="e_startframe2" type="SpinBox" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 232.0
+margin_top = 112.0
+margin_right = 306.0
+margin_bottom = 136.0
+
+[node name="l_special_case" type="Label" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_top = 145.0
+margin_right = 73.0
+margin_bottom = 159.0
+text = "Special"
+
+[node name="e_special_case" type="LineEdit" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 77.0
+margin_top = 140.0
+margin_right = 151.0
+margin_bottom = 164.0
+text = "none"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="l_damagetype" type="Label" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 155.0
+margin_top = 145.0
+margin_right = 228.0
+margin_bottom = 159.0
+text = "Dmgtype"
+
+[node name="e_dmgtype" type="OptionButton" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 232.0
+margin_top = 140.0
+margin_right = 306.0
+margin_bottom = 164.0
+text = "none"
+items = [ "none", null, false, 0, null, "physical", null, false, 1, null, "magical", null, false, 2, null, "guardbreak", null, false, 3, null, "reset_position", null, false, 4, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="l_direction" type="Label" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_top = 173.0
+margin_right = 73.0
+margin_bottom = 187.0
+text = "Direction"
+
+[node name="e_launchdir" type="OptionButton" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 77.0
+margin_top = 168.0
+margin_right = 151.0
+margin_bottom = 192.0
+text = "facing"
+items = [ "facing", null, false, 0, null, "away", null, false, 1, null, "none", null, false, 2, null ]
+selected = 0
+
+[node name="l_activeframes" type="Label" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 155.0
+margin_top = 173.0
+margin_right = 228.0
+margin_bottom = 187.0
+text = "Animspeed"
+
+[node name="e_activeframes" type="SpinBox" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 232.0
+margin_top = 168.0
+margin_right = 306.0
+margin_bottom = 192.0
+value = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="l_sfx" type="Label" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_top = 201.0
+margin_right = 73.0
+margin_bottom = 215.0
+text = "Sound"
+
+[node name="e_sfx" type="LineEdit" parent="tool_panel/VBoxContainer/slash_opts"]
+margin_left = 77.0
+margin_top = 196.0
+margin_right = 151.0
+margin_bottom = 220.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="tool_panel/VBoxContainer"]
+margin_top = 564.0
+margin_right = 396.0
+margin_bottom = 584.0
+alignment = 1
+
+[node name="copy_button" type="Button" parent="tool_panel/VBoxContainer/HBoxContainer"]
+margin_left = 113.0
+margin_right = 175.0
+margin_bottom = 20.0
+text = "Copy all"
+
+[node name="Button" type="Button" parent="tool_panel/VBoxContainer/HBoxContainer"]
+margin_left = 179.0
+margin_right = 282.0
+margin_bottom = 20.0
+text = "Copy rect only"
+
+[node name="frameselect" type="HSlider" parent="."]
+anchor_top = 1.0
+anchor_right = 0.677
+anchor_bottom = 1.0
+margin_left = 26.0
+margin_top = -28.2788
+margin_right = -31.5601
+margin_bottom = -5.27881
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="l_frame" type="Label" parent="frameselect"]
+margin_left = 3.7755
+margin_top = -18.8774
+margin_right = 43.7755
+margin_bottom = -4.87744
+custom_styles/normal = SubResource( 1 )
+text = "Frame"
+
+[node name="scale_slider" type="VSlider" parent="."]
+margin_left = 38.0952
+margin_top = 35.7195
+margin_right = 54.0952
+margin_bottom = 267.72
+min_value = 1.0
+max_value = 8.0
+value = 3.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="scale_slider"]
+margin_left = -10.1352
+margin_top = -15.7921
+margin_right = 29.8648
+margin_bottom = -1.79205
+custom_styles/normal = SubResource( 2 )
+text = "Scale"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="text_changed" from="tool_panel/VBoxContainer/sprite_name_filter" to="." method="on_filter_change"]
+[connection signal="item_selected" from="tool_panel/VBoxContainer/sprite_list" to="." method="on_sprite_selected"]
+[connection signal="pressed" from="tool_panel/VBoxContainer/HBoxContainer/copy_button" to="." method="_on_copy_button_pressed"]
+[connection signal="pressed" from="tool_panel/VBoxContainer/HBoxContainer/Button" to="." method="on_copy_rect"]
+[connection signal="value_changed" from="frameselect" to="." method="on_set_preview_frame"]
+[connection signal="value_changed" from="scale_slider" to="." method="on_scale_slider_value_changed"]

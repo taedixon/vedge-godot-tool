@@ -7,6 +7,7 @@ var scn_hsl = preload("res://scenes/hsl_editor.tscn")
 var scn_plants = preload("res://scenes/asset_metadata.tscn")
 var scn_lights = preload("res://scenes/light_editor.tscn")
 var scn_parallax = preload("res://scenes/parallax_preview.tscn")
+var scn_hitbox = preload("res://scenes/hitbox_tool.tscn")
 var active_scene = {}
 
 
@@ -24,6 +25,8 @@ func _ready():
 	menu_tool.get_popup().connect("id_pressed", self, "on_menu_tool")
 	# debug
 	GmsAssetCache.set_project(Config.config.get_value("paths", "last_project_file"))
+	if (!GmsAssetCache.project_loaded()):
+		$project_select.popup_centered()
 	active_scene = scene_container.get_child(0)
 
 
@@ -55,6 +58,10 @@ func on_menu_tool(id):
 				$project_select.popup_centered()
 		3:
 			next_scene = scn_parallax.instance()
+			if (!GmsAssetCache.project_loaded()):
+				$project_select.popup_centered()
+		4:
+			next_scene = scn_hitbox.instance()
 			if (!GmsAssetCache.project_loaded()):
 				$project_select.popup_centered()
 	if next_scene:

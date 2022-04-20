@@ -40,7 +40,7 @@ func _unhandled_input(event):
 			on_show_selection_change(input_show_selection.pressed)
 			get_tree().set_input_as_handled()
 	
-func _process(delta):
+func _process(_delta):
 	var history_input_dir = 0
 	if Input.is_action_just_released("map_zoom_in"):
 		history_input_dir = 1

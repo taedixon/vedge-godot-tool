@@ -14,6 +14,6 @@ func _draw():
 func set_selection(newsel):
 	polygon = newsel
 	selection_col = PoolColorArray()
-	for i in range(0, selection.size()):
+	for _i in range(0, selection.size()):
 		selection_col.append(fill_col)
 	update()
