@@ -27,3 +27,6 @@ func on_selection_param_changed(params):
 
 func on_request_selection_clear():
 	emit_signal("request_selection_clear")
+
+func on_colour_pick(mousebutton, colour):
+	edit_toolbar.on_colour_pick(mousebutton, colour)
