@@ -32,6 +32,8 @@ const gaussian_55 = [
 ]
 
 var sector_index_array = PoolIntArray()
+var sector_xmax = 0
+var sector_ymax = 0
 
 const col_min_dist = 3/256
 
@@ -479,6 +481,20 @@ func stroke_blur_point(tx, ty):
 	current_stroke.points[encode] = blended_col
 	current_stroke.new_points[encode] = true
 	
+func shift_all(delta):
+	current_stroke = {
+		"count": 1, 
+		"points": {},
+		"new_points": {},
+		"basis": {},
+		"colour": Color.white,
+		"fullcolor_points": true,
+	}
+	for tx in range(0, tile_w+1):
+		for ty in range(0, tile_h+1):
+			var sample = get_vertex_colour(tx - delta.x, ty - delta.y)
+			stroke_add_point_color(tx, ty, sample, 1.0)
+	end_stroke()
 
 # only applies new points in the stroke
 func apply_stroke_new(stroke):

@@ -8,6 +8,7 @@ var active_layer = null
 var last_mouse_pos = Vector2()
 var mouse_travel = 0
 var draw_param = { }
+var dragged = Vector2()
 
 var selection_param = { }
 
@@ -175,6 +176,17 @@ func process_regular_tool(mb, mousepos):
 		"GRAD":
 			if update_tool_rect(mb, mousepos):
 				map.add_stroke_gradient(get_gradient_colors(), tool_rect.position, tool_rect.position + tool_rect.size, draw_param)
+		"DRAG":
+			if update_tool_rect(mb, mousepos):
+				if dragged != Vector2():
+					map.commit_drag(dragged)
+					dragged = Vector2()
+			else:
+				if mb != 0:
+					var delta = ((mousepos - tool_rect.position)/ 16).floor() 
+					if delta != dragged:
+						map.preview_drag(delta)
+						dragged = delta
 	
 # returns true if rect was committed
 func update_tool_rect(mb, mousepos):

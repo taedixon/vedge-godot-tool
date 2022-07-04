@@ -50,7 +50,7 @@ func populate_map(roomdata):
 	for layer in roomdata.layers:
 		var meta = layer_metadata[layer.name]
 		match meta.kind:
-			"tile": 
+			"tile":
 				nodes_to_add.push_front(add_tile_layer(layer))
 			"light": 
 				nodes_to_add.push_front(add_light_layer(layer))
@@ -61,7 +61,7 @@ func populate_map(roomdata):
 	for i in nodes_to_add:
 		layers_root.add_child(i)
 		
-	position = -bounds.size / 2
+	position = Vector2()
 	update()
 	
 		
@@ -296,6 +296,15 @@ func add_stroke_gradient(grad_color, p1, p2, params):
 		var p1_local = (p1-position)/scale
 		var p2_local = (p2-position)/scale
 		active_layer.add_stroke_gradient(grad_color, p1_local, p2_local, params, selection)
+		
+func preview_drag(offset):
+	if layer_editable():
+		active_layer.position = offset * 16
+	
+func commit_drag(offset):
+	if layer_editable():
+		active_layer.position = Vector2()
+		active_layer.shift_all(offset)
 
 func end_stroke():
 	if layer_editable():
