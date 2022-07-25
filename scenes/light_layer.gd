@@ -72,8 +72,8 @@ func set_detail(new_detail):
 
 func save(f: File):
 	detail.vertex_count = 0
-	for y in range(0, tile_h-1):
-		for x in range(0, tile_w-1):
+	for y in range(0, tile_h):
+		for x in range(0, tile_w):
 			try_save_quad(x, y, f)
 	print(detail.vertex_count)
 	
