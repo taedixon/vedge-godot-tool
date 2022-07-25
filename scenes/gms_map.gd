@@ -72,7 +72,7 @@ func add_asset_layer(layer):
 		var spr_info = GmsAssetCache.get_sprite(asset.spriteId.path)
 		spr.centered = false
 		spr.offset = spr_info.offset
-		spr.texture = spr_info.texture
+		spr.texture = spr_info.frames[asset.headPosition]
 		spr.position = Vector2(asset.x, asset.y)
 		spr.rotation_degrees = -asset.rotation
 		spr.scale = Vector2(asset.scaleX, asset.scaleY)
