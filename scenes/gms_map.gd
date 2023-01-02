@@ -45,25 +45,67 @@ func populate_map(roomdata):
 	room_name = roomdata.name
 	for child in layers_root.get_children():
 		layers_root.remove_child(child)
-	var nodes_to_add = []
-	create_layer_metadata(roomdata)
-	for layer in roomdata.layers:
-		var meta = layer_metadata[layer.name]
-		match meta.kind:
-			"tile":
-				nodes_to_add.push_front(add_tile_layer(layer))
-			"light": 
-				nodes_to_add.push_front(add_light_layer(layer))
-			"asset": 
-				nodes_to_add.push_front(add_asset_layer(layer))
-			"background":
-				nodes_to_add.push_front(add_background_layer(layer))
-	for i in nodes_to_add:
-		layers_root.add_child(i)
-		
+	layer_metadata = create_layer_metadata(roomdata, {})
+	var newnodes = populate_layers(roomdata.layers, layer_metadata, [])
+	newnodes.sort_custom(self, "layer_depth_sort")
+	for i in newnodes:
+		layers_root.add_child(i.node)
 	position = Vector2()
 	update()
+
+func layer_depth_sort(a, b):
+	return a.depth > b.depth
 	
+func populate_layers(layers_list, metadata, nodes_to_add):
+	find_light_layers(layers_list, metadata)
+	find_parallax_data(layers_list, metadata)
+	for layer in layers_list:
+		var meta = metadata[layer.name]
+		match meta.kind:
+			"tile":
+				nodes_to_add.push_front({
+					"node": add_tile_layer(layer), 
+					"depth": layer.depth
+				})
+			"light": 
+				nodes_to_add.push_front({
+					"node": add_light_layer(layer),
+					"depth": layer.depth
+				})
+			"asset": 
+				nodes_to_add.push_front({
+					"node": add_asset_layer(layer),
+					"depth": layer.depth
+				})
+			"background":
+				nodes_to_add.push_front({
+					"node": add_background_layer(layer),
+					"depth": layer.depth
+				})
+			"instance":
+				nodes_to_add.push_front({
+					"node": add_instance_layer(layer),
+					"depth": layer.depth
+				})
+			"nested":
+				populate_layers(layer.layers, metadata, nodes_to_add)
+	return nodes_to_add
+	
+func add_instance_layer(layer):
+	var base = Node2D.new()
+	for inst in layer.instances:
+		var spr_info = GmsAssetCache.get_object(inst.objectId.path).sprite
+		if spr_info != null:
+			var spr = Sprite.new()
+			spr.centered = false
+			spr.offset = spr_info.offset
+			spr.texture = spr_info.frames[inst.imageIndex]
+			spr.position = Vector2(inst.x, inst.y)
+			spr.rotation_degrees = -inst.rotation
+			spr.scale = Vector2(inst.scaleX, inst.scaleY)
+			base.add_child(spr)
+	base.name = layer.name
+	return base
 		
 func add_asset_layer(layer):
 	var base = Node2D.new()
@@ -84,22 +126,54 @@ func add_tile_layer(layer):
 	var tileinfo = GmsAssetCache.get_tileset(layer.tilesetId.path)
 	var tmap = TileMap.new()
 	tmap.tile_set = tileinfo.tileset
-	tmap.cell_size = Vector2(16, 16)
+	tmap.cell_size = Vector2(tileinfo.tile_width, tileinfo.tile_height)
 	var tx = 0
 	var ty = 0
 	var xmax = layer.tiles.SerialiseWidth
-	for tid in layer.tiles.TileSerialiseData:
-		var itid = int(tid)
-		var tid_real = itid & 0x7FFFF
-		if tid_real > 0:
-			tmap.set_cell(tx, ty, tid_real, (itid & 0x10000000) != 0, (itid & 0x20000000) != 0, (itid & 0x40000000) != 0)
-		tx += 1
-		if (tx >= xmax):
-			tx = 0
-			ty += 1
+	if layer.tiles.TileDataFormat == 1:
+		var repeat = 0
+		var value_is_raw = false
+		for tid in layer.tiles.TileCompressedData:
+			if repeat == 0:
+				repeat = tid
+			else:
+				var itid = int(tid)
+				var tid_real = itid & 0x7FFFF
+				if repeat < 0:
+					# RLE tile data
+					repeat = abs(repeat)
+					for i in range(repeat):
+						if tid_real > 0:
+							tmap.set_cell(tx, ty, tid_real, (itid & 0x10000000) != 0, (itid & 0x20000000) != 0, (itid & 0x40000000) != 0)
+						tx += 1
+						if (tx >= xmax):
+							tx = 0
+							ty += 1
+					repeat = 0
+				else:
+					# raw tile data
+					repeat -= 1
+					if tid_real > 0:
+						tmap.set_cell(tx, ty, tid_real, (itid & 0x10000000) != 0, (itid & 0x20000000) != 0, (itid & 0x40000000) != 0)
+					tx += 1
+					if (tx >= xmax):
+						tx = 0
+						ty += 1
+	else:
+		for tid in layer.tiles.TileSerialiseData:
+			var itid = int(tid)
+			var tid_real = itid & 0x7FFFF
+			if tid_real > 0:
+				tmap.set_cell(tx, ty, tid_real, (itid & 0x10000000) != 0, (itid & 0x20000000) != 0, (itid & 0x40000000) != 0)
+			tx += 1
+			if (tx >= xmax):
+				tx = 0
+				ty += 1
 	tmap.visible = layer.visible
 	tmap.name = layer.name
 	return tmap
+	
+		
 	
 func add_light_layer(layer):
 	var light_data = get_metadata(layer.name).detail
@@ -147,8 +221,7 @@ func add_background_layer(layer):
 	return node
 	
 	
-func create_layer_metadata(roomdata):
-	layer_metadata = {}
+func create_layer_metadata(roomdata, data_object):
 	for layer in roomdata.layers:
 		var meta = {
 			"kind": "unknown",
@@ -165,9 +238,11 @@ func create_layer_metadata(roomdata):
 				meta.kind = "tile"
 			"GMRBackgroundLayer":
 				meta.kind = "background"
-		layer_metadata[layer.name] = meta
-	find_light_layers(roomdata)
-	find_parallax_data(roomdata)
+			"GMRLayer":
+				meta.kind = "nested"
+				meta.detail = create_layer_metadata(layer, data_object)
+		data_object[layer.name] = meta
+	return data_object
 	
 func get_light_layers():
 	var lightlayers = []
@@ -176,8 +251,8 @@ func get_light_layers():
 			lightlayers.push_back(layer.name)
 	return lightlayers
 	
-func find_parallax_data(roomdata):
-	for layer in roomdata.layers:
+func find_parallax_data(layerlist, metadata):
+	for layer in layerlist:
 		if layer.resourceType == "GMRInstanceLayer" && layer.instances:
 			for inst in layer.instances:
 				if inst.objectId.name == "o_background":
@@ -188,13 +263,13 @@ func find_parallax_data(roomdata):
 							if parsed.error == OK:
 								data = parsed.result
 					for item in data:
-						var meta = layer_metadata.get(item[0])
+						var meta = metadata.get(item[0])
 						if meta:
 							meta.parallax.x = float(item[1])
 							meta.parallax.y = float(item[2])
 
-func find_light_layers(roomdata):
-	for layer in roomdata.layers:
+func find_light_layers(layerlist, metadata):
+	for layer in layerlist:
 		if layer.resourceType == "GMRInstanceLayer" && layer.instances:
 			for inst in layer.instances:
 				if inst.objectId.name == "o_grid_light":
@@ -210,7 +285,7 @@ func find_light_layers(roomdata):
 					if !("shimmerSpeed" in inst_simple):
 						inst_simple.shimmerSpeed = 1
 					inst_simple.is_glow = inst_simple.get("is_glow") == "True"
-					var meta = layer_metadata[inst_simple.layer_name]
+					var meta = metadata[inst_simple.layer_name]
 					inst_simple.vertex_count = 0
 					inst_simple.version = "vtf_lightmap_1"
 					inst_simple.build = "baked" 

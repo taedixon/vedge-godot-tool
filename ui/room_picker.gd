@@ -63,7 +63,7 @@ func set_layer_list(room_path):
 	var roomdata = GmsAssetCache.get_yy(room_path)
 	for layer in roomdata.layers:
 		var layer_type = layer.resourceType
-		if layer_type == "GMRTileLayer" || layer_type == "GMRAssetLayer" || layer_type == "GMRBackgroundLayer":
+		if layer_type == "GMRTileLayer" || layer_type == "GMRAssetLayer" || layer_type == "GMRBackgroundLayer" || layer_type == "GMRInstanceLayer":
 			var listitem = scn_layer_item.instance()
 			listitem.layer_name = layer.name
 			listitem.layer_visible = layer.visible

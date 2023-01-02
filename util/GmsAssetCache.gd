@@ -5,6 +5,7 @@ signal project_changed()
 # Declare member variables here. Examples:
 var saved_tilesets = {}
 var saved_sprites = {}
+var saved_instances = {}
 var project = null
 var root_path = ""
 
@@ -36,22 +37,31 @@ func populate_tileset(tdata):
 	var img = Image.new()
 	var sprite_data = _load_yy(root_path + tdata.spriteId.path)
 	var sprite_folder = tdata.spriteId.path.get_base_dir() + "/"
-	var sprite_path = root_path + sprite_folder + sprite_data.frames[0].compositeImage.FrameId.name + ".png"
+	var frame_obj = sprite_data.frames[0]
+	var sprite_path
+	if frame_obj.resourceVersion == "1.1":
+		sprite_path = root_path + sprite_folder + frame_obj.name + ".png"
+	else:
+		sprite_path = root_path + sprite_folder + frame_obj.compositeImage.FrameId.name + ".png"
 	img.load(sprite_path)
 	var tex = ImageTexture.new()
 	tex.create_from_image(img)
 	tex.flags = 3
 	var tileset = TileSet.new()
 	var tile_idx = 0
-	for y in range(0, sprite_data.height, 16):
-		for x in range(0, sprite_data.width, 16):
+	var twidth = tdata.tileWidth
+	var theight = tdata.tileHeight
+	for y in range(0, sprite_data.height, theight):
+		for x in range(0, sprite_data.width, twidth):
 			tileset.create_tile(tile_idx)
 			tileset.tile_set_texture(tile_idx, tex)
-			tileset.tile_set_region(tile_idx, Rect2(x, y, 16, 16))
+			tileset.tile_set_region(tile_idx, Rect2(x, y, twidth, theight))
 			tile_idx += 1
 	tileset_info.tileset = tileset
 	tileset_info.mask = tdata.tile_count
 	tileset_info.image = img
+	tileset_info.tile_width = twidth
+	tileset_info.tile_height = theight
 	return tileset_info
 
 func get_sprite(path):
@@ -68,9 +78,13 @@ func populate_sprite(yydata):
 	var sprite_info = {}
 	sprite_info.frames = []
 	for f in yydata.frames:
-		var frame = f.compositeImage
-		var sprite_folder = frame.FrameId.path.get_base_dir() + "/"
-		var sprite_path = root_path + sprite_folder + frame.FrameId.name + ".png"
+		var sprite_path
+		if f.resourceVersion == "1.1":
+			sprite_path = root_path + "sprites/" + yydata.name + "/" + f.name + ".png"
+		else:
+			var frame = f.compositeImage
+			var sprite_folder = frame.FrameId.path.get_base_dir() + "/"
+			sprite_path = root_path + sprite_folder + frame.FrameId.name + ".png"
 		var img = Image.new()
 		img.load(sprite_path)
 		var tex = ImageTexture.new()
@@ -80,6 +94,24 @@ func populate_sprite(yydata):
 	sprite_info.texture = sprite_info.frames[0]
 	sprite_info.offset = Vector2(-yydata.sequence.xorigin, -yydata.sequence.yorigin)
 	return sprite_info
+
+func get_object(path):
+	if !(path in saved_instances):
+		saved_instances[path] = load_object(path)
+	return saved_instances[path]
+
+func load_object(path):
+	var yydata = _load_yy(root_path + path)
+	if yydata:
+		return populate_object(yydata)
+
+func populate_object(yydata):
+	var inst_info = {}
+	if yydata.spriteId != null:
+		inst_info.sprite = get_sprite(yydata.spriteId.path)
+	else:
+		inst_info.sprite = null
+	return inst_info
 
 func get_room_list():
 	var list = []
